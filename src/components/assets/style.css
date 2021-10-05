@@ -153,8 +153,9 @@
   padding: 20px;
   text-align: center;
   width: 70%;
-  margin-left: 70px;
+  margin: auto;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 .speak-now{
   background-color: white;
@@ -295,4 +296,8 @@
 
 .button_click_cursor {
   cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

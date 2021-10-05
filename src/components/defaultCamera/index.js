@@ -20,8 +20,6 @@ import {withRouter, useHistory} from 'react-router-dom';
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 
-const remote = window.require('electron').remote;
-
 Amplify.configure({
   Auth: {
     identityPoolId: awsconfig.aws_cognito_identity_pool_id, //REQUIRED - Amazon Cognito Identity Pool ID
@@ -74,10 +72,6 @@ const WrapperInput = styled.div`
 // const optionsKeyBoard = ["normal keyboard", "dasher keyboard"];
 const optionsKeyBoard = ["normal keyboard"];
 
-const getWindowSize = () => {
-  return remote.getCurrentWindow().getBounds()
-}
-
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
   const [detectedObject, setDetectedObject] = useState();
@@ -106,8 +100,8 @@ const DefaultCamera = (props) => {
   let sentenceList = [];
   let history = useHistory();
 
-  const screenwidth = getWindowSize().width;
-  const screenheight = getWindowSize().height;
+  const screenwidth = window.screen.width;
+  const screenheight = window.screen.height;
   const customLayout = {
     'default': [
       'a b c d e f',
@@ -539,17 +533,13 @@ const DefaultCamera = (props) => {
                       </h1>
                       {input && <p className="pollyText">{input}</p>}
                       <Row>
-                        <Col md={6} style={{ padding: "0px" }}>
-                          <div className="speak-now" onClick={speakText}>
+                          <div className="speak-now" style={{margin: "auto", marginTop: "20px"}} onClick={speakText}>
                             Yes-Speak
                           </div>
-                        </Col>
-                        <Col md={6} style={{ paddingLeft: "0px" }}>
-                          <div className="back-btn" onClick={handleGoBack}>
+                          <div className="back-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleGoBack}>
                             {" "}
                             No-Go Back{" "}
                           </div>
-                        </Col>
                       </Row>
                       <br />
                       <Row>
@@ -597,18 +587,14 @@ const DefaultCamera = (props) => {
                       />
                     ) : ''}
                     <Row>
-                      <Col md={6} style={{ padding: "0px" }}>
-                        <div className="speak-btn" onClick={handleConfirmSpeak}>
+                        <div className="speak-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleConfirmSpeak}>
                           {" "}
                           Speak{" "}
                         </div>
-                      </Col>
-                      <Col md={6} style={{ paddingLeft: "0px" }}>
-                        <div className="clear-btn" onClick={handleClear}>
+                        <div className="clear-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleClear}>
                           {" "}
                           Clear{" "}
                         </div>
-                      </Col>
                     </Row>
                   </>
                 )}
