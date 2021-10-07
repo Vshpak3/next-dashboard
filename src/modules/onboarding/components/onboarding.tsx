@@ -11,7 +11,14 @@ const Container = styled("div")`
   position: relative;
 `;
 
+const ContentWrapper = styled("div")`
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, white 50%, #e73645 50%)
+`;
+
 const Content = styled("div")`
+  margin-top: 56px;
   width: 2960px;
   height: 2197px;
   background: #ffffff;
@@ -69,6 +76,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
 
   return (
     <Container>
+      <ContentWrapper>
       <Content>
         <LogoIconWrapper>
           <LogoIcon />
@@ -83,6 +91,7 @@ export const Onboarding: React.FC<OnboardingProps> = () => {
           </SignUpWrapper>
         </BottomBlock>
       </Content>
+      </ContentWrapper>
     </Container>
   );
 };
