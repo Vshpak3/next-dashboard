@@ -20,6 +20,8 @@ import {withRouter, useHistory} from 'react-router-dom';
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 
+const remote = window.require('electron').remote;
+
 Amplify.configure({
   Auth: {
     identityPoolId: awsconfig.aws_cognito_identity_pool_id, //REQUIRED - Amazon Cognito Identity Pool ID
@@ -72,6 +74,10 @@ const WrapperInput = styled.div`
 // const optionsKeyBoard = ["normal keyboard", "dasher keyboard"];
 const optionsKeyBoard = ["normal keyboard"];
 
+const getWindowSize = () => {
+  return remote.getCurrentWindow().getBounds()
+}
+
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
   const [detectedObject, setDetectedObject] = useState();
@@ -100,8 +106,10 @@ const DefaultCamera = (props) => {
   let sentenceList = [];
   let history = useHistory();
 
-  const screenwidth = window.screen.width;
-  const screenheight = window.screen.height;
+  let screenwidth = getWindowSize().width;
+  let screenheight = getWindowSize().height;
+  let camWidth, camHeight;
+
   const customLayout = {
     'default': [
       'a b c d e f',
@@ -191,8 +199,14 @@ const DefaultCamera = (props) => {
       })
       .then((stream) => {
         video.srcObject = stream;
+        // let { width, height } = stream.getTracks()[0].getSettings();
+        // camWidth = width;
+        // camHeight = height;
+
         return new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
+            camWidth = video.videoWidth;
+            camHeight = video.videoHeight;
             video.play();
             resolve();
           };
@@ -350,6 +364,17 @@ const DefaultCamera = (props) => {
   const renderPredictions = (predictions) => {
     setData(predictions);
     const c = document.getElementById("canvas");
+    screenwidth = getWindowSize().width;
+    screenheight = getWindowSize().height;
+    let heightModifyCount = 0
+    let currentCamHeight = screenheight
+    let currentCamWidth = screenwidth;
+
+    if (screenwidth/screenheight !== camWidth/camHeight) {
+      currentCamHeight = camHeight * screenwidth / camWidth;
+      heightModifyCount = (screenheight - currentCamHeight) / 2;
+      currentCamWidth = screenwidth
+    }
 
     if (c) {
       const ctx = c.getContext("2d");
@@ -360,10 +385,11 @@ const DefaultCamera = (props) => {
       ctx.textBaseline = "top";
 
       predictions.forEach((prediction) => {
-        const x = prediction.bbox[0];
-        const y = prediction.bbox[1];
-        const width = prediction.bbox[2];
-        const height = prediction.bbox[3];
+        let [ x, y, width, height ] = prediction.bbox;
+        x = x * currentCamWidth / camWidth;
+        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
+        width = width * currentCamWidth / camWidth;
+        height = height * currentCamHeight / camHeight;
         // Draw the bounding box.
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
@@ -376,8 +402,9 @@ const DefaultCamera = (props) => {
       });
 
       predictions.forEach((prediction) => {
-        const x = prediction.bbox[0];
-        const y = prediction.bbox[1];
+        let [ x, y ] = prediction.bbox;
+        x = x * currentCamWidth / camWidth;
+        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
         // Draw the text last to ensure it's on top.
         ctx.fillStyle = "#000000";
         ctx.fillText(prediction.class, x + 30, y);
@@ -644,7 +671,7 @@ const DefaultCamera = (props) => {
             </>
           )}
 
-          <Col md={12}
+          <Col
           >
             <video id="video" width={screenwidth} height={screenheight} />
             {keyboardFalg === true &&

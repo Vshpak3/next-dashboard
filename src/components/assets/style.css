@@ -1,10 +1,15 @@
 #canvas {
   position: fixed;
- 
+  top: 0;
+  left: 0;
+  display: block;
 }
 
 #video {
   position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
 }
 
 .loading {
