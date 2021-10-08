@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import { Container, Row, Col } from "reactstrap";
 import AWS, { IoTSecureTunneling } from "aws-sdk";
 import Amplify, { Auth, Storage } from "aws-amplify";
-import Webcam from "react-webcam";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import "../assets/style.css";
@@ -36,18 +35,6 @@ Amplify.configure({
       identityPoolId: awsconfig.aws_cognito_identity_pool_id,
     },
 });
-// AWS.config.update({
-//   accessKeyId: '302426983597',
-//   secretAccessKey: 'vhkshjdtys1!Q'
-// })
-
-// const config = {
-//   bucketName: awsConfigs.aws_user_files_s3_bucket,
-//   albumName: 'sentences',
-//   region: awsConfigs.aws_cognito_region,
-//     accessKeyId: '302426983597',
-//   secretAccessKey: 'vhkshjdtys1!Q'
-// }
 
 const WrapperInput = styled.div`
   width: 514px;
@@ -141,39 +128,6 @@ const DefaultCamera = (props) => {
   useEffect(() => {
     video = document.getElementById("video"); 
     getSentenceData();
-
-    // function readTextFile(file)
-    // {
-    //     var rawFile = new XMLHttpRequest();
-    //     rawFile.open("GET", file, false);
-    //     rawFile.onreadystatechange = function ()
-    //     {
-    //         if(rawFile.readyState === 4)
-    //         {
-    //             if(rawFile.status === 200 || rawFile.status == 0)
-    //             {
-    //               sentenceList.push(rawFile.responseText);
-    //               // setSentence(sentenceList);
-    //               getList();
-    //               console.log("123123")
-    //               console.log(typeof(JSON.stringify(rawFile.responseText)));
-    //             }
-    //         }
-    //     }
-    //     rawFile.send(null);
-    // }
-    // Storage.put( "user-sentence.json", [{"person":"where are you going to?"}], {
-    //   level: "private",
-    // })
-    //   .then((result) => console.log(result))
-    //   .catch((err) => console.log(err))
-
-    // Storage.get("user-sentence.json", { level: "private" })
-    // .then(result => 
-    //   readTextFile(result)
-    // )
-    // .catch(err => console.log(err));
-
     
     const webCamPromise = loadVideo(video);      
 
@@ -199,9 +153,6 @@ const DefaultCamera = (props) => {
       })
       .then((stream) => {
         video.srcObject = stream;
-        // let { width, height } = stream.getTracks()[0].getSettings();
-        // camWidth = width;
-        // camHeight = height;
 
         return new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
@@ -235,8 +186,6 @@ const DefaultCamera = (props) => {
               {
                 sentenceList.push(rawFile.responseText);
                 getList();
-                // console.log("123123")
-                // console.log(rawFile.responseText);
               }
           }
       }
@@ -269,27 +218,19 @@ const DefaultCamera = (props) => {
   }
   
   const onChange = (input) => {
-    console.log("onChange: ", input);
-    //console.log("input before",input );
     setInput(input);
     console.log("Input changed", input);
     keyboard.current.setInput(input);
     let predictionary = Predictionary.instance();
     predictionary.addWords(suggestionsJson);
     let suggestions = predictionary.predict(input);
-    // console.log("suggestions>>", suggestions);
     setSuggestions(suggestions);
   };
 
-  // const [temp, settemp] = useState('')
-
   const handleSuggestions = (suggestion, index) => {
     console.log("suggestion ", suggestion, "  index ", index);
-    // console.log("input text", input);
-    // console.log("input lenght", input.length)
     const lastSpaceCharacterIndex = input.lastIndexOf(" ");
     const substring = input.substring(0, lastSpaceCharacterIndex + 1);
-    //  console.log("Substring after truncation...", substring);
     setInput(substring + `${suggestion}` + " ");
     keyboard.current.setInput(substring + `${suggestion}` + " ");
   };
@@ -358,7 +299,6 @@ const DefaultCamera = (props) => {
         }
     }, false);
     })
-    // loadVideo(video);
  }
 
   const renderPredictions = (predictions) => {
@@ -415,9 +355,6 @@ const DefaultCamera = (props) => {
   const handleObject = (e) => {
     console.log("clicked");
     setDetectedObject(e.target.value);
-    // findSentences(e.target.value);
-    // getSentenceData();
-    // getList();
     setStarter(true);
     setFkeyboard(false);
     setKeyboardFlag(false);
@@ -430,10 +367,6 @@ const DefaultCamera = (props) => {
   const findSentences = (value) => {
     console.log('value')
     let result = presentences && presentences.length && presentences.map((j) => (j.name === value ? j.value : ""));
-  
-    // console.log("sdfsdf");
-    // console.log(typeof(presentences));
-    // console.log(presentences)
     setSentence(result);
   };
   const handleKeyboard = () => {
@@ -465,15 +398,9 @@ const DefaultCamera = (props) => {
     // Create presigned URL of synthesized speech file
     signer.getSynthesizeSpeechUrl(finalData, function (error, url) {
       if (error) {
-        // document.getElementById("result").innerHTML = error;
         console.log("error polly speak ", error);
       } else {
-        // setParent(true);
-
-        pollyaudioplay(url).then(function () {
-          // finalData.Text="";
-           // setInput('')
-          // setParent(true);
+          pollyaudioplay(url).then(function () {
           setTimeout(() => {
             setParent(false);
           }, 3000);
@@ -514,18 +441,7 @@ const DefaultCamera = (props) => {
     setKeyboardFlag(true);
     setConfirmSpeak(true);
     setInput(`${sentence}`);
-    // speakText();
-    // history.push({
-    //   pathname: '/pollySpeaking',
-    //   state: { detail: sentence }
-    // });
-
-    // keyboard.current.setInput(`${sentence[0]}`);
   };
-  // useEffect(()=>{
-  //   console.log("input in useeffect",input);
-  //   speakText();
-  // },);
   return (
     <>
       {parent && <PollySpeaking audioText={input != "" ? { input } : ""} />}
@@ -546,12 +462,6 @@ const DefaultCamera = (props) => {
                   zIndex: 999
                 }}
               >
-                {/* <input
-                  value={input}
-                  placeholder={"Tap on the virtual keyboard to start"}
-                  onChange={onChangeInput}
-                  className="inputData"
-                /> */}
                 {confirmSpeak ? (
                   <>
                     <Col md={12} style={{ padding: "0px", marginTop: "0px" }}>
@@ -587,7 +497,6 @@ const DefaultCamera = (props) => {
                     <h5>Suggested:</h5>
                     {suggestions &&
                       suggestions.map((suggestion, index) => {
-                        // console.log(`suggestions>>`, suggestions);
                         return (
                           <>
                             <span
@@ -701,29 +610,6 @@ const DefaultCamera = (props) => {
             <div class="output">
               <img id="photo" /> 
             </div>
-            
-            {/* {data ? (
-              data.map((obj) => {
-                console.log(`data>>>`, data);
-                return (
-                  <div className="sugestion" key={obj.class}>
-                    <Button
-                    variant="outlined"
-                      value={obj.class}
-                      onClick={handleObject}
-                    >
-                      {obj.class}
-                      </Button>
-                  </div>
-                );
-              })
-              ) : (
-              <>
-                <div>
-                  <p>No Object Detected</p>
-                </div>
-                </>
-            )} */}
           </Col>
         </Row>
       </Container>
