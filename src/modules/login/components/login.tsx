@@ -21,11 +21,10 @@ const ContentWrapper = styled("div")`
 `
 
 const Content = styled("div")`
-  margin-top: 56px;
+  margin-top: 90px;
   width: 2960px;
   height: 2197px;
-  background: #ffffff;
-  transform: scale(0.25) translate(-50%, -50%);
+  transform: scale(0.4) translate(-50%, -50%);
   transform-origin: left top;
   position: absolute;
   top: 50%;
@@ -53,7 +52,6 @@ const BottomBlock = styled("div")`
   display: flex;
   flex-direction: column;
   flex: 1 0 0;
-  background: #e73645;
 `;
 
 const UsernameWrapper = styled("div")`
