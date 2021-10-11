@@ -14,7 +14,7 @@ const Container = styled("div")`
 const ContentWrapper = styled("div")`
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, white 50%, #e73645 50%)
+  background: linear-gradient(to bottom, white 50%, #e60000 50%)
 `;
 
 const Content = styled("div")`
@@ -42,7 +42,7 @@ const Title = styled("div")`
   font-weight: normal;
   font-size: 120px;
   line-height: 153px;
-  color: #484848;
+  color: #e60000;
 `;
 
 const BottomBlock = styled("div")`

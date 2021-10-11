@@ -34,7 +34,7 @@ const FormWrapper = styled("div")`
 const FooterWrapper = styled("div")`
   width: 2960px;
   height: 513px;
-  background: #e73645;
+  background: #e60000;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -56,7 +56,7 @@ const Label = styled("div")`
   font-size: 60px;
   line-height: 76px;
 
-  color: #e73645;
+  color: #e60000;
 `;
 
 const InputWrapper = styled("div")`
@@ -99,14 +99,14 @@ const LogoTitle = styled("div")`
   font-size: 120px;
   line-height: 153px;
   text-align: center;
-  color: #e73645;
+  color: #e60000;
   width: 100%;
 `;
 
 const ProfileIconWrapper = styled("div")`
   margin-top: 33px;
   background: #ffffff;
-  border: 2px solid #e73645;
+  border: 2px solid #e60000;
   box-sizing: border-box;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.04), -1px 1px 2px rgba(0, 0, 0, 0.02);
   border-radius: 40px;
@@ -134,7 +134,7 @@ const NoProfileText = styled("div")`
   line-height: 38px;
   text-align: center;
 
-  color: #484848;
+  color: #e60000;
   position: absolute;
   bottom: 0;
 `;
@@ -144,7 +144,7 @@ const UploadBtn = styled("label")`
   outline: none;
   height: 110px;
   background: #ffffff;
-  border: 2px solid #e73645;
+  border: 2px solid #e60000;
   box-sizing: border-box;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.04), -1px 1px 2px rgba(0, 0, 0, 0.02);
   border-radius: 40px;
@@ -160,7 +160,7 @@ const UploadBtn = styled("label")`
   font-size: 60px;
   line-height: 76px;
 
-  color: #e73645;
+  color: #e60000;
 
   &:hover {
     background: #d6d6da;

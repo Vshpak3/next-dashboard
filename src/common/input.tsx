@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 export const Input = styled("input")`
-  border: 2px solid #e73645;
+  border: 2px solid #e60000;
   outline: none;
   width: 859px;
   height: 110px;
@@ -16,7 +16,7 @@ export const Input = styled("input")`
   font-size: 80px;
   line-height: 102px;
   text-align: center;
-  color: #484848;
+  color: #e60000;
 
   &::placeholder {
     color: #c4c4c4;
@@ -46,7 +46,7 @@ const Label = styled("div")`
   font-size: 60px;
   line-height: 76px;
 
-  color: #e73645;
+  color: #e60000;
 `;
 
 const UpClickableBlock = styled("div")`

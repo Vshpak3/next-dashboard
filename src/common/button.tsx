@@ -15,7 +15,7 @@ export const Button = styled("button")`
   font-size: 80px;
   line-height: 102px;
   text-align: center;
-  color: #484848;
+  color: #e60000;
 
   &:hover {
     background: #d6d6da;

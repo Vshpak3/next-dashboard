@@ -35,13 +35,13 @@ const IconWrapper = styled.div`
   text-align: center;
   padding: 20px;
   &:hover {
-    background-color: #e73745;
+    background-color: #e60000;
   }
   &:hover .icon-ui {
     color: #fff;
   }
   .icon-ui {
-    color: #e73745;
+    color: #e60000;
   }
 `
 
