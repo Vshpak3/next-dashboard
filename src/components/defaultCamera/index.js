@@ -324,12 +324,12 @@ const DefaultCamera = (props) => {
               {data.length > 3 && <img src={Next} alt="next" />}
             </Navigate>
           </Predictions>
-          <Logo>
-            <img src={LogoImg} alt="logo" />
-          </Logo>
-          <Focus>
-            <img src={FocusImg} alt="focus" />
-          </Focus>
+          {/*<Logo>*/}
+          {/*  <img src={LogoImg} alt="logo" />*/}
+          {/*</Logo>*/}
+          {/*<Focus>*/}
+          {/*  <img src={FocusImg} alt="focus" />*/}
+          {/*</Focus>*/}
         </Row>
       </Container>
     </>
