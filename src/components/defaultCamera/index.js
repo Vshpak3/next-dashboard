@@ -1,25 +1,20 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "reactstrap";
-import AWS, { IoTSecureTunneling } from "aws-sdk";
-import Amplify, { Auth, Storage } from "aws-amplify";
+import Amplify, { Storage } from "aws-amplify";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import "../assets/style.css";
-import jsonData from "./data.json";
-import suggestionsJson from "./suggestions.json";
-import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-import Predictionary from "predictionary";
-import Footer from "./footer";
-import PollySpeaking from "./pollySpeaking";
-import { TurnedIn } from "@material-ui/icons";
-import Button from "@material-ui/core/Button";
-import {withRouter, useHistory} from 'react-router-dom';
+import { withRouter, useHistory } from "react-router-dom";
+import LogoImg from "../assets/polly_name.png";
+import Back from "../assets/back.png";
+import Next from "../assets/next.png";
+import FocusImg from "../assets/focus.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 
-const remote = window.require('electron').remote;
+const remote = window.require("electron").remote;
 
 Amplify.configure({
   Auth: {
@@ -29,67 +24,107 @@ Amplify.configure({
     userPoolWebClientId: awsconfig.aws_user_pools_web_client_id, //OPTIONAL - Amazon Cognito Web Client ID
   },
   Storage: {
-    
-      bucket: awsconfig.aws_user_files_s3_bucket, //REQUIRED -  Amazon S3 bucket name
-      region: awsconfig.aws_cognito_region, //OPTIONAL -  Amazon service region
-      identityPoolId: awsconfig.aws_cognito_identity_pool_id,
-    },
+    bucket: awsconfig.aws_user_files_s3_bucket, //REQUIRED -  Amazon S3 bucket name
+    region: awsconfig.aws_cognito_region, //OPTIONAL -  Amazon service region
+    identityPoolId: awsconfig.aws_cognito_identity_pool_id,
+  },
 });
 
-const WrapperInput = styled.div`
-  width: 514px;
-  height: 200px;
-  /* background: #ddd; */
-  position: absolute;
-  top: 15px;
+const initialData = [
+  { class: "Person" },
+  { class: "Cell phone" },
+  { class: "TV" },
+  { class: "Laptop" },
+  { class: "Pen" },
+  { class: "Cup" },
+  { class: "Bottle" },
+  { class: "Window" },
+];
+
+const Predictions = styled.div`
+  position: fixed;
+  bottom: 10%;
+  display: flex;
   left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 999;
-  .inputData {
-    width: 100%;
-  }
-
-  @media only screen and (max-width: 768px) {
-    width: 150px;
-  }
-
-  @media only screen and (max-width: 500px) {
-    width: 100px;
+  transform: translateX(-50%);
+  width: 100%;
+  & > div {
+    margin: 0 20px;
   }
 `;
 
-// const optionsKeyBoard = ["normal keyboard", "dasher keyboard"];
-const optionsKeyBoard = ["normal keyboard"];
+const ItemPredictions = styled.div`
+  background: #5757578c;
+  mix-blend-mode: hard-light;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+  border-radius: 30px;
+  display: inline-flex;
+  width: 210px;
+  height: 90px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 30px;
+  span {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  &:first-child {
+    margin-left: 0;
+  }
+  &:last-child {
+    margin-right: 0;
+  }
+`;
+
+const Logo = styled.div`
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  img {
+    width: 50%;
+  }
+`;
+
+const Navigate = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  cursor: pointer;
+  img {
+    width: 40px;
+  }
+`;
+
+const ListPredictions = styled.div`
+  display: block;
+  flex: 8;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+`;
+
+const Focus = styled.div`
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  img {
+    width: 50%;
+  }
+`;
 
 const getWindowSize = () => {
-  return remote.getCurrentWindow().getBounds()
-}
+  return remote.getCurrentWindow().getBounds();
+};
 
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
-  const [detectedObject, setDetectedObject] = useState();
   const [senetnce, setSentence] = useState();
-  const [confirmSpeak, setConfirmSpeak] = useState(false);
-  const [keyboardFalg, setKeyboardFlag] = useState(false);
-  // const [keyboardFalg, sremoveKeyboardFlag] = useState(false);
-  const [selectedOption, setSelectopOption] = useState(optionsKeyBoard[0]);
-  const [fkeyboard, setFkeyboard] = useState(false);
-  // console.log(`selectedOption>>>`,selectedOption)
-  const [input, setInput] = useState();
-  const [layout, setLayout] = useState("default");
-  const [starter, setStarter] = useState(false);
-  const keyboard = useRef();
-  const [suggestions, setSuggestions] = useState();
   const [parent, setParent] = useState(false);
-  const [text, setText] = useState({
-    OutputFormat: "mp3",
-    SampleRate: "16000",
-    Text: "",
-    TextType: "text",
-    VoiceId: "Matthew",
-  });
-  
-  var presentences;
+
   let sentenceList = [];
   let history = useHistory();
 
@@ -97,39 +132,13 @@ const DefaultCamera = (props) => {
   let screenheight = getWindowSize().height;
   let camWidth, camHeight;
 
-  const customLayout = {
-    'default': [
-      'a b c d e f',
-      'g h i j k l',
-      'm n o p q r',
-      's t u v w x',
-      'y z 1 2 3 4',
-      '5 6 7 8 9 0',
-      '{shift} .com {enter}',
-      '&!? {space} {bksp}'
-    ],
-    'shift': [
-      'A B C D E F',
-      'G H I J K L',
-      'M N O P Q R',
-      'S T U V W X',
-      'Y Z 1 2 3 4',
-      '5 6 7 8 9 0',
-      '&!? {space} {bksp}'
-    ]
-  }
   let video;
-  let canvas1;
-  let photo;
-  let width;
-  let height;
-  let streaming;
 
   useEffect(() => {
-    video = document.getElementById("video"); 
+    video = document.getElementById("video");
     getSentenceData();
-    
-    const webCamPromise = loadVideo(video);      
+
+    const webCamPromise = loadVideo(video);
 
     const modelPromise = cocoSsd.load();
     Promise.all([modelPromise, webCamPromise])
@@ -166,93 +175,57 @@ const DefaultCamera = (props) => {
       .catch(() => {
         alert("No camera Detected. Enable camera and refresh the page");
       });
-      return webCamPromise;
-  }
-
-  const changeKeyBoardStatus = () => {
-    setFkeyboard(!fkeyboard);
-    setKeyboardFlag(!keyboardFalg);
-    setStarter(false);
-  }
+    return webCamPromise;
+  };
 
   const readTextFile = (file) => {
-      var rawFile = new XMLHttpRequest();
-      rawFile.open("GET", file, false);
-      rawFile.onreadystatechange = function ()
-      {
-          if(rawFile.readyState === 4)
-          {
-              if(rawFile.status === 200 || rawFile.status == 0)
-              {
-                sentenceList.push(rawFile.responseText);
-                getList();
-              }
-          }
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function () {
+      if (rawFile.readyState === 4) {
+        if (rawFile.status === 200 || rawFile.status == 0) {
+          sentenceList.push(rawFile.responseText);
+          getList();
+        }
       }
-      rawFile.send(null);
-  }
+    };
+    rawFile.send(null);
+  };
 
   const getFileList = async () => {
     // let fileList = [];
-    let data = Storage.list('sen_') // for listing ALL files without prefix, pass '' instead
-    .then(result => {
-      return result;
-    }).catch(err => console.log(err));
+    let data = Storage.list("sen_") // for listing ALL files without prefix, pass '' instead
+      .then((result) => {
+        return result;
+      })
+      .catch((err) => console.log(err));
     return data;
-  }
+  };
 
   const getSentenceData = async () => {
     let fileList = await getFileList();
-    let list = []; 
+    let list = [];
     fileList.map((r) => {
       list.push(r.key);
-    })
+    });
 
-    for (let i = 0 ; i < list.length, i < 7; i++) {
+    for (let i = 0; i < list.length, i < 7; i++) {
       await Storage.get(`${list[i]}`, { level: "public" })
-      .then(result => 
-        readTextFile(result)
-      ).catch(err => console.log(err));
+        .then((result) => readTextFile(result))
+        .catch((err) => console.log(err));
     }
-    
-  }
-  
-  const onChange = (input) => {
-    setInput(input);
-    console.log("Input changed", input);
-    keyboard.current.setInput(input);
-    let predictionary = Predictionary.instance();
-    predictionary.addWords(suggestionsJson);
-    let suggestions = predictionary.predict(input);
-    setSuggestions(suggestions);
   };
 
-  const handleSuggestions = (suggestion, index) => {
-    console.log("suggestion ", suggestion, "  index ", index);
-    const lastSpaceCharacterIndex = input.lastIndexOf(" ");
-    const substring = input.substring(0, lastSpaceCharacterIndex + 1);
-    setInput(substring + `${suggestion}` + " ");
-    keyboard.current.setInput(substring + `${suggestion}` + " ");
-  };
-  const handleShift = () => {
-    const newLayoutName = layout === "default" ? "shift" : "default";
-    setLayout(newLayoutName);
-  };
-  const onKeyPress = (button) => {
-    console.log("Button pressed", button);
-
-    /**
-     * If you want to handle the shift and caps lock buttons
-     */
-    if (button === "{shift}" || button === "{lock}") handleShift();
-  };
-
-  const onChangeInput = (event) => {
-    const input = event.target.value;
-    setInput(input);
-  };
   const detectFrame = (video, model) => {
     model.detect(video).then((predictions) => {
+      console.log(predictions);
+      const newPrediction = predictions.map((prediction) => prediction.class);
+      if (
+        JSON.stringify(newPrediction.sort()) !== JSON.stringify(data.sort())
+      ) {
+        setData(newPrediction);
+      }
+
       renderPredictions(predictions);
       requestAnimationFrame(() => {
         detectFrame(video, model);
@@ -260,60 +233,19 @@ const DefaultCamera = (props) => {
     });
   };
 
-// Take snapshopt of canvas
-  const takePhoto = () => {
-    video = document.getElementById("video");
-    canvas1 = document.getElementById('canvas1');
-    photo = document.getElementById('photo');
-    width = 1366;
-    height = 768;
-    streaming = false;
-    loadVideo(video).then(() => {
-      video.addEventListener('canplay', function(ev) {
-        if (!streaming) {
-            height = video.videoHeight / (video.videoWidth / width);
-  
-            if (isNaN(height)) {
-                height = width / (4 / 3);
-            }
-  
-            video.setAttribute('width', screenwidth);
-            video.setAttribute('height', screenheight);
-            canvas1.setAttribute('width', width);
-            canvas1.setAttribute('height', height);
-            streaming = true;
-            var context = canvas1.getContext('2d');
-            canvas1.width = width;
-            canvas1.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            var data = canvas1.toDataURL('image/png');
-            photo.setAttribute('name', Date.now());
-            photo.setAttribute('src', data);
-            var link = document.createElement('a');
-            link.href = photo.src;
-            link.download = `${photo.name}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.location.reload();
-        }
-    }, false);
-    })
- }
-
+  console.log({ dataOut: data });
   const renderPredictions = (predictions) => {
-    setData(predictions);
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
-    let heightModifyCount = 0
-    let currentCamHeight = screenheight
+    let heightModifyCount = 0;
+    let currentCamHeight = screenheight;
     let currentCamWidth = screenwidth;
 
-    if (screenwidth/screenheight !== camWidth/camHeight) {
-      currentCamHeight = camHeight * screenwidth / camWidth;
+    if (screenwidth / screenheight !== camWidth / camHeight) {
+      currentCamHeight = (camHeight * screenwidth) / camWidth;
       heightModifyCount = (screenheight - currentCamHeight) / 2;
-      currentCamWidth = screenwidth
+      currentCamWidth = screenwidth;
     }
 
     if (c) {
@@ -325,11 +257,11 @@ const DefaultCamera = (props) => {
       ctx.textBaseline = "top";
 
       predictions.forEach((prediction) => {
-        let [ x, y, width, height ] = prediction.bbox;
-        x = x * currentCamWidth / camWidth;
-        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
-        width = width * currentCamWidth / camWidth;
-        height = height * currentCamHeight / camHeight;
+        let [x, y, width, height] = prediction.bbox;
+        x = (x * currentCamWidth) / camWidth;
+        y = (y * currentCamHeight) / camHeight + heightModifyCount;
+        width = (width * currentCamWidth) / camWidth;
+        height = (height * currentCamHeight) / camHeight;
         // Draw the bounding box.
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
@@ -342,9 +274,9 @@ const DefaultCamera = (props) => {
       });
 
       predictions.forEach((prediction) => {
-        let [ x, y ] = prediction.bbox;
-        x = x * currentCamWidth / camWidth;
-        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
+        let [x, y] = prediction.bbox;
+        x = (x * currentCamWidth) / camWidth;
+        y = (y * currentCamHeight) / camHeight + heightModifyCount;
         // Draw the text last to ensure it's on top.
         ctx.fillStyle = "#000000";
         ctx.fillText(prediction.class, x + 30, y);
@@ -352,279 +284,54 @@ const DefaultCamera = (props) => {
     }
   };
 
-  const handleObject = (e) => {
-    console.log("clicked");
-    setDetectedObject(e.target.value);
-    setStarter(true);
-    setFkeyboard(false);
-    setKeyboardFlag(false);
-  };
-  
   const getList = () => {
     setSentence(sentenceList);
-  }
+  };
 
-  const findSentences = (value) => {
-    console.log('value')
-    let result = presentences && presentences.length && presentences.map((j) => (j.name === value ? j.value : ""));
-    setSentence(result);
+  const nextItem = () => {
+    document.getElementById("listPredictions").scrollLeft += 500;
   };
-  const handleKeyboard = () => {
-    // setInput('')
-    setKeyboardFlag(true);
-  };
-  const handleBack = () => {
-    setStarter(false);
-  };
-  const speakText = () => {
-    connect();
 
-    // Create the Polly service object and presigner object
-    const finalData = { ...text, Text: input };
-    console.log("Final Polly Data", finalData);
+  const backItem = () => {
+    document.getElementById("listPredictions").scrollLeft -= 500;
+  };
 
-    if (finalData.Text !== "") {
-      let filename = `sen_${Date.now()}.json`;
-      Storage.put(filename, finalData.Text, {
-        level: "public",
-      })
-        .then((result) => console.log(result))
-        .catch((err) => console.log(err));
-    }
-
-    var polly = new AWS.Polly({ apiVersion: "2016-06-10" });
-    var signer = new AWS.Polly.Presigner(finalData, polly);
-
-    // Create presigned URL of synthesized speech file
-    signer.getSynthesizeSpeechUrl(finalData, function (error, url) {
-      if (error) {
-        console.log("error polly speak ", error);
-      } else {
-          pollyaudioplay(url).then(function () {
-          setTimeout(() => {
-            setParent(false);
-          }, 3000);
-          setKeyboardFlag(false);
-          setStarter(false);
-          setSuggestions(false);
-        });
-      }
-    });
-  };
-  const pollyaudioplay = (audiosource) => {
-    return new Promise(function (resolve, reject) {
-      document.getElementById("audioSource").src = audiosource;
-      document.getElementById("audioPlayback").load();
-      document.getElementById("audioPlayback").play();
-      document.getElementById("audioPlayback").onerror = reject;
-      document.getElementById("audioPlayback").onended = resolve;
-    });
-  };
-  const connect = () => {
-    // Initialize the Amazon Cognito credentials provider
-    AWS.config.region = "us-east-1"; // Region
-    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: "us-east-1:47c46f2d-f5b1-4857-9d20-27b64cf32b2c",
-    });
-  };
-  const handleConfirmSpeak = () => {
-    setConfirmSpeak(true);
-  };
-  const handleGoBack = () => {
-    setConfirmSpeak(false);
-  };
-  const handleClear = () => {
-    setInput("");
-    keyboard.current.setInput("");
-  };
-  const handleSentence = (sentence) => {
-    setKeyboardFlag(true);
-    setConfirmSpeak(true);
-    setInput(`${sentence}`);
-  };
   return (
     <>
-      {parent && <PollySpeaking audioText={input != "" ? { input } : ""} />}
       <Container style={{ display: parent && "none" }} fluid={true}>
         <Row>
-          {keyboardFalg ? (
-            <>
-              <Col
-                md={3}
-                style={{
-                  position: "absolute",
-                  padding: "0px",
-                  marginTop: "0px",
-                  float: "right",
-                  marginRight:"-169px",
-                  backgroundColor: "rgb(255, 255, 255, 0.5)",
-                  height: "100%",
-                  zIndex: 999
-                }}
-              >
-                {confirmSpeak ? (
-                  <>
-                    <Col md={12} style={{ padding: "0px", marginTop: "0px" }}>
-                      <h1 className="sentence-checker">
-                        Is this Sentence Correct?
-                      </h1>
-                      {input && <p className="pollyText">{input}</p>}
-                      <Row>
-                          <div className="speak-now" style={{margin: "auto", marginTop: "20px"}} onClick={speakText}>
-                            Yes-Speak
-                          </div>
-                          <div className="back-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleGoBack}>
-                            {" "}
-                            No-Go Back{" "}
-                          </div>
-                      </Row>
-                      <br />
-                      <Row>
-                        <Col ms={12}>
-                          <audio
-                            id="audioPlayback"
-                            controls
-                            style={{ display: "none" }}
-                          >
-                            <source id="audioSource" type="audio/mp3" src="" />
-                          </audio>
-                        </Col>
-                      </Row>
-                    </Col>
-                  </>
-                ) : (
-                  <>
-                    <h5>Suggested:</h5>
-                    {suggestions &&
-                      suggestions.map((suggestion, index) => {
-                        return (
-                          <>
-                            <span
-                              className="suggestions"
-                              key={index}
-                              onClick={() =>
-                                handleSuggestions(suggestion, index)
-                              }
-                            >
-                              {" "}
-                              {suggestion}{" "}
-                            </span>
-                          </>
-                        );
-                      })}
-                    <br />
-                    {fkeyboard ? (
-                      <Keyboard
-                        keyboardRef={(r) => (keyboard.current = r)}
-                        layout={customLayout}
-                        layoutName={layout}
-                        onChange={onChange}
-                        onKeyPress={onKeyPress}
-                      />
-                    ) : ''}
-                    <Row>
-                        <div className="speak-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleConfirmSpeak}>
-                          {" "}
-                          Speak{" "}
-                        </div>
-                        <div className="clear-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleClear}>
-                          {" "}
-                          Clear{" "}
-                        </div>
-                    </Row>
-                  </>
-                )}
-              </Col>
-            </>
-          ) : (
-            <>
-              {starter && (
-                <>
-                  <Col
-                    md={3}
-                    style={{
-                      position: "absolute",
-                      padding: "0px",
-                      marginTop: "0px",
-                      float: "right",
-                      marginRight:"-169px",
-                      backgroundColor: "rgb(255, 255, 255, 0.5)",
-                      height: "100%",
-                      zIndex: 999
-                    }}
-                  >
-                    <h1 className="sentence-stater">Sentence Starters</h1>
-                    {senetnce ? senetnce.map((s) => {
-                      return(
-                        <p
-                        className="demo-text"
-                        id="demo-text"
-                        onClick={() => handleSentence(s)}
-                      >
-
-                        {s}
-                      </p>
-                      )
-                    }) : (
-                      <p className="demo-text">No Sentence</p>
-                    )}
-                    <div className="btn-wrapper" onClick={handleKeyboard}>
-                      Start New Sentence
-                    </div>
-                    <div className="btn-wrapper-black" onClick={handleBack}>
-                      Exit Writing App
-                    </div>
-                  </Col>
-                </>
-              )}
-            </>
-          )}
-
-          <Col
-          >
+          <Col>
             <video id="video" width={screenwidth} height={screenheight} />
-            {keyboardFalg === true &&
-              confirmSpeak === false &&
-              selectedOption !== "normal keyboard" && (
-                <input
-                  value={input}
-                  placeholder={"Tap on the virtual keyboard to start"}
-                  // onChange={onChangeInput}
-                  className="inputData"
-                />
-              )}
-            {keyboardFalg === true &&
-              confirmSpeak === false &&
-              selectedOption === "normal keyboard" && (
-                <WrapperInput>
-                  <input
-                    value={input}
-                    placeholder={"Tap on the virtual keyboard to ..."}
-                    onChange={onChangeInput}
-                    className="inputData"
-                  />
-                </WrapperInput>
-              )}
-            <canvas id="canvas" width={screenwidth} height={screenheight}/>
-            <canvas id="canvas1" width={screenwidth} height={screenheight}/>
-            <div class="output">
-              <img id="photo" /> 
+            <canvas id="canvas" width={screenwidth} height={screenheight} />
+            <div className="output">
+              <img id="photo" />
             </div>
           </Col>
+          <Predictions>
+            <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
+              {data.length > 3 && <img src={Back} alt="back" />}
+            </Navigate>
+
+            <ListPredictions id={"listPredictions"}>
+              {data.length > 0 &&
+                data.map((item) => (
+                  <ItemPredictions>
+                    <span>{item}</span>
+                  </ItemPredictions>
+                ))}
+            </ListPredictions>
+            <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
+              {data.length > 3 && <img src={Next} alt="next" />}
+            </Navigate>
+          </Predictions>
+          <Logo>
+            <img src={LogoImg} alt="logo" />
+          </Logo>
+          <Focus>
+            <img src={FocusImg} alt="focus" />
+          </Focus>
         </Row>
       </Container>
-
-      {/* )} */}
-      {parent === false && (
-        <Footer
-          handleKeyboard={handleKeyboard}
-          changeKeyBoardStatus={changeKeyBoardStatus}
-          optionsKeyBoard={optionsKeyBoard}
-          takePhoto={takePhoto}
-          setSelectopOption={setSelectopOption}
-          toggleSidebar={handleObject}
-        />
-      )}
     </>
   );
 };
