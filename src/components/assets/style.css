@@ -3,6 +3,7 @@
   top: 0;
   left: 0;
   display: block;
+  cursor: auto;
 }
 
 #video {
@@ -305,4 +306,26 @@
 
 ::-webkit-scrollbar {
   display: none;
+}
+.pending-load {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #a2a2a2;
+}
+.start-detecting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff96;
+  border-radius: 20px;
+  padding: 10px 30px;
+}
+
+.start-detecting img {
+  width: 40px;
 }

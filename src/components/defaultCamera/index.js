@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col } from "reactstrap";
 import Amplify, { Storage } from "aws-amplify";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
@@ -6,10 +6,10 @@ import "@tensorflow/tfjs";
 import "../assets/style.css";
 import "react-simple-keyboard/build/css/index.css";
 import { withRouter, useHistory } from "react-router-dom";
-import LogoImg from "../assets/polly_name.png";
+import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
-import FocusImg from "../assets/focus.png";
+import Spinner from "../assets/Spinner.gif";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
@@ -65,6 +65,7 @@ const ItemPredictions = styled.div`
   justify-content: center;
   align-items: center;
   margin: 0 30px;
+  cursor: pointer;
   span {
     color: #ffffff;
     font-size: 26px;
@@ -75,6 +76,9 @@ const ItemPredictions = styled.div`
   }
   &:last-child {
     margin-right: 0;
+  }
+  &.active {
+    background: #ed157f;
   }
 `;
 
@@ -124,31 +128,40 @@ const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
   const [senetnce, setSentence] = useState();
   const [parent, setParent] = useState(false);
+  const [model, setModel] = useState(null);
+  const [currentChoice, setCurrentChoice] = useState(null);
+  const [isReady, setIsReady] = useState(false);
 
   let sentenceList = [];
   let history = useHistory();
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
-  let camWidth, camHeight;
 
-  let video;
+  const camWidthRef = useRef(null);
+  const camHeightRef = useRef(null);
+
+  const video = useRef(null);
 
   useEffect(() => {
-    video = document.getElementById("video");
-    getSentenceData();
-
-    const webCamPromise = loadVideo(video);
-
-    const modelPromise = cocoSsd.load();
-    Promise.all([modelPromise, webCamPromise])
-      .then((values) => {
-        detectFrame(video, values[0]);
-      })
-      .catch(() => {
-        alert("Video not loaded. Refresh the page");
-      });
+    getModel();
   }, []);
+
+  const getModel = async () => {
+    try {
+      const webCamPromise = loadVideo(video.current);
+      const modelPromise = cocoSsd.load();
+
+      const model = await Promise.all([modelPromise, webCamPromise]);
+      setIsReady(true);
+      setModel(model[0]);
+
+      // start detect frame
+      startDetect(model[0]);
+    } catch (err) {
+      alert("Video not loaded. Refresh the page");
+    }
+  };
 
   const loadVideo = (video) => {
     const webCamPromise = navigator.mediaDevices
@@ -165,15 +178,16 @@ const DefaultCamera = (props) => {
 
         return new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
-            camWidth = video.videoWidth;
-            camHeight = video.videoHeight;
+            camWidthRef.current = video.videoWidth;
+            camHeightRef.current = video.videoHeight;
             video.play();
             resolve();
           };
         });
       })
-      .catch(() => {
-        alert("No camera Detected. Enable camera and refresh the page");
+      .catch((err) => {
+        // alert("No camera Detected. Enable camera and refresh the page");
+        alert(err);
       });
     return webCamPromise;
   };
@@ -216,31 +230,70 @@ const DefaultCamera = (props) => {
     }
   };
 
+  const requestAnimationFrameRef = useRef(null);
+
   const detectFrame = (video, model) => {
     model.detect(video).then((predictions) => {
-      console.log(predictions);
-      const newPrediction = predictions.map((prediction) => prediction.class);
-      if (
-        JSON.stringify(newPrediction.sort()) !== JSON.stringify(data.sort())
-      ) {
-        setData(newPrediction);
-      }
-
-      renderPredictions(predictions);
-      requestAnimationFrame(() => {
-        detectFrame(video, model);
-      });
+      setData(
+        predictions.sort((item1, item2) =>
+          item1.class.localeCompare(item2.class)
+        )
+      );
     });
   };
 
-  console.log({ dataOut: data });
-  const renderPredictions = (predictions) => {
+  const stopDetect = () => {
+    clearInterval(requestAnimationFrameRef.current);
+  };
+
+  const startDetect = (initModel) => {
+    requestAnimationFrameRef.current = setInterval(() => {
+      detectFrame(video.current, initModel);
+    }, 3000);
+  };
+
+  const clearCanvas = () => {
+    const c = document.getElementById("canvas");
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  };
+
+  const choiceObject = (objectChoice) => {
+    // did not choice object
+    if (currentChoice == null) {
+      stopDetect();
+
+      setCurrentChoice(objectChoice);
+      renderPredictions(data, objectChoice);
+    }
+    // change object other
+    else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
+      stopDetect();
+
+      setCurrentChoice(objectChoice);
+      renderPredictions(data, objectChoice);
+    }
+    // dont choice object
+    else {
+      startDetect(model);
+      setCurrentChoice(null);
+      clearCanvas();
+    }
+  };
+
+  console.log();
+
+  const renderPredictions = (predictions, currentChoice) => {
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
     let heightModifyCount = 0;
     let currentCamHeight = screenheight;
     let currentCamWidth = screenwidth;
+
+    const camWidth = camWidthRef.current;
+    const camHeight = camHeightRef.current;
 
     if (screenwidth / screenheight !== camWidth / camHeight) {
       currentCamHeight = (camHeight * screenwidth) / camWidth;
@@ -256,31 +309,37 @@ const DefaultCamera = (props) => {
       ctx.font = font;
       ctx.textBaseline = "top";
 
-      predictions.forEach((prediction) => {
-        let [x, y, width, height] = prediction.bbox;
-        x = (x * currentCamWidth) / camWidth;
-        y = (y * currentCamHeight) / camHeight + heightModifyCount;
-        width = (width * currentCamWidth) / camWidth;
-        height = (height * currentCamHeight) / camHeight;
-        // Draw the bounding box.
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(x, y, width, height);
-        // Draw the label background.
-        ctx.fillStyle = "gray";
-        const textWidth = ctx.measureText(prediction.class).width;
-        const textHeight = parseInt(font, 10); // base 10
-        ctx.fillRect(x + 30, y, textWidth + 4, textHeight + 4);
-      });
+      const predictionChoice = predictions.filter(
+        (prediction) => prediction.bbox[0] === currentChoice.bbox[0]
+      );
 
-      predictions.forEach((prediction) => {
-        let [x, y] = prediction.bbox;
-        x = (x * currentCamWidth) / camWidth;
-        y = (y * currentCamHeight) / camHeight + heightModifyCount;
-        // Draw the text last to ensure it's on top.
-        ctx.fillStyle = "#000000";
-        ctx.fillText(prediction.class, x + 30, y);
-      });
+      if (!!predictionChoice) {
+        predictionChoice.forEach((prediction) => {
+          let [x, y, width, height] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          width = (width * currentCamWidth) / camWidth;
+          height = (height * currentCamHeight) / camHeight;
+          // Draw the bounding box.
+          ctx.strokeStyle = "#ED157F";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x, y, width, height);
+          // Draw the label background.
+          ctx.fillStyle = "gray";
+          const textWidth = ctx.measureText(prediction.class).width;
+          const textHeight = parseInt(font, 10); // base 10
+          ctx.fillRect(x + 30, y, textWidth + 4, textHeight + 4);
+        });
+
+        predictionChoice.forEach((prediction) => {
+          let [x, y] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          // Draw the text last to ensure it's on top.
+          ctx.fillStyle = "#000000";
+          ctx.fillText(prediction.class, x + 30, y);
+        });
+      }
     }
   };
 
@@ -297,11 +356,16 @@ const DefaultCamera = (props) => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <Container style={{ display: parent && "none" }} fluid={true}>
         <Row>
           <Col>
-            <video id="video" width={screenwidth} height={screenheight} />
+            <video
+              id="video"
+              width={screenwidth}
+              height={screenheight}
+              ref={(node) => (video.current = node)}
+            />
             <canvas id="canvas" width={screenwidth} height={screenheight} />
             <div className="output">
               <img id="photo" />
@@ -315,8 +379,16 @@ const DefaultCamera = (props) => {
             <ListPredictions id={"listPredictions"}>
               {data.length > 0 &&
                 data.map((item) => (
-                  <ItemPredictions>
-                    <span>{item}</span>
+                  <ItemPredictions
+                    className={
+                      currentChoice != null &&
+                      item.bbox[0] === currentChoice.bbox[0]
+                        ? "active"
+                        : ""
+                    }
+                    onClick={() => choiceObject(item)}
+                  >
+                    <span>{item.class}</span>
                   </ItemPredictions>
                 ))}
             </ListPredictions>
@@ -324,15 +396,21 @@ const DefaultCamera = (props) => {
               {data.length > 3 && <img src={Next} alt="next" />}
             </Navigate>
           </Predictions>
-          {/*<Logo>*/}
-          {/*  <img src={LogoImg} alt="logo" />*/}
-          {/*</Logo>*/}
-          {/*<Focus>*/}
-          {/*  <img src={FocusImg} alt="focus" />*/}
-          {/*</Focus>*/}
         </Row>
+        {!isReady && (
+          <div
+            className="pending-load"
+            style={{ width: screenwidth, height: screenheight }}
+          >
+            <div className="start-detecting">
+              <img src={LockImg} className="mr-3" alt="lock" />
+              <span className="mr-3">Start detecting</span>
+              <img src={Spinner} alt="" />
+            </div>
+          </div>
+        )}
       </Container>
-    </>
+    </React.Fragment>
   );
 };
 
