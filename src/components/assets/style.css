@@ -329,3 +329,56 @@
 .start-detecting img {
   width: 40px;
 }
+.action-list .icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #5757578c;
+  mix-blend-mode: hard-light;
+}
+.action-list .text-mess {
+  background: #ffffffb8;
+  mix-blend-mode: hard-light;
+  border-radius: 10px;
+  padding: 10px 20px;
+  position: relative;
+  margin-right: 60px;
+}
+.text-mess:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -40px;
+  width: 0;
+  height: 0;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+
+  border-left: 40px solid #ffffffb8;
+}
+.action-list .keyboard {
+  height: 70px;
+  width: 210px;
+  background: #FFFFFF8c;
+  mix-blend-mode: hard-light;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.keyboard img {
+  width: 40%;
+  height: auto;
+}
+.icon-circle img {
+  width: 60%;
+}
+.talk.active {
+  background-color: #ED157F;
+}

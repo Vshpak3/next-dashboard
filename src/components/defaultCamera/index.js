@@ -10,9 +10,13 @@ import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
 import Spinner from "../assets/Spinner.gif";
+import TalkIcon from "../assets/talkIcon.png";
+import CancelMess from "../assets/cancelMessIcon.png";
+import Keyboard from "../assets/ketboardIcon.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
+import AWS from "aws-sdk";
 
 const remote = window.require("electron").remote;
 
@@ -41,6 +45,14 @@ const initialData = [
   { class: "Window" },
 ];
 
+const initSpeak = {
+  OutputFormat: "mp3",
+  SampleRate: "16000",
+  Text: "",
+  TextType: "text",
+  VoiceId: "Matthew",
+};
+
 const Predictions = styled.div`
   position: fixed;
   bottom: 10%;
@@ -48,9 +60,14 @@ const Predictions = styled.div`
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  & > div {
+  flex-direction: column;
+  & > div > div {
     margin: 0 20px;
   }
+`;
+
+const Action = styled.div`
+  position: fixed;
 `;
 
 const ItemPredictions = styled.div`
@@ -126,11 +143,12 @@ const getWindowSize = () => {
 
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
-  const [senetnce, setSentence] = useState();
+  const [sentence, setSentence] = useState([]);
   const [parent, setParent] = useState(false);
   const [model, setModel] = useState(null);
   const [currentChoice, setCurrentChoice] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [isSpeak, setIsSpeak] = useState(false);
 
   let sentenceList = [];
   let history = useHistory();
@@ -144,6 +162,7 @@ const DefaultCamera = (props) => {
   const video = useRef(null);
 
   useEffect(() => {
+    getSentenceData();
     getModel();
   }, []);
 
@@ -198,8 +217,11 @@ const DefaultCamera = (props) => {
     rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4) {
         if (rawFile.status === 200 || rawFile.status == 0) {
-          sentenceList.push(rawFile.responseText);
-          getList();
+          // sentenceList.push(rawFile.responseText);
+          //
+          // console.log(rawFile.responseText);
+          // getList();
+          setSentence([...sentence, rawFile.responseText]);
         }
       }
     };
@@ -282,8 +304,6 @@ const DefaultCamera = (props) => {
     }
   };
 
-  console.log();
-
   const renderPredictions = (predictions, currentChoice) => {
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
@@ -343,10 +363,61 @@ const DefaultCamera = (props) => {
     }
   };
 
+  // speaker
+  const speakText = () => {
+    connect();
+
+    // Create the Polly service object and presigner object
+    const finalData = { ...initSpeak, Text: sentence[0] };
+    console.log("Final Polly Data", finalData);
+
+    if (finalData.Text !== "") {
+      let filename = `sen_${Date.now()}.json`;
+      Storage.put(filename, finalData.Text, {
+        level: "public",
+      })
+        .then((result) => console.log(result))
+        .catch((err) => console.log(err));
+    }
+
+    var polly = new AWS.Polly({ apiVersion: "2016-06-10" });
+    var signer = new AWS.Polly.Presigner(finalData, polly);
+
+    // Create presigned URL of synthesized speech file
+    signer.getSynthesizeSpeechUrl(finalData, function (error, url) {
+      if (error) {
+        console.log("error polly speak ", error);
+      } else {
+        pollyaudioplay(url).then(function () {
+          setTimeout(() => {
+            setIsSpeak(false);
+          }, 1000);
+        });
+      }
+    });
+  };
+  const pollyaudioplay = (audiosource) => {
+    return new Promise(function (resolve, reject) {
+      setIsSpeak(true);
+      document.getElementById("audioSource").src = audiosource;
+      document.getElementById("audioPlayback").load();
+      document.getElementById("audioPlayback").play();
+      document.getElementById("audioPlayback").onerror = reject;
+      document.getElementById("audioPlayback").onended = resolve;
+    });
+  };
+  const connect = () => {
+    // Initialize the Amazon Cognito credentials provider
+    AWS.config.region = "us-east-1"; // Region
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: "us-east-1:47c46f2d-f5b1-4857-9d20-27b64cf32b2c",
+    });
+  };
+
   const getList = () => {
     setSentence(sentenceList);
   };
-
+  console.log({ sentenceList });
   const nextItem = () => {
     document.getElementById("listPredictions").scrollLeft += 500;
   };
@@ -371,30 +442,56 @@ const DefaultCamera = (props) => {
               <img id="photo" />
             </div>
           </Col>
-          <Predictions>
-            <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
-              {data.length > 3 && <img src={Back} alt="back" />}
-            </Navigate>
 
-            <ListPredictions id={"listPredictions"}>
-              {data.length > 0 &&
-                data.map((item) => (
-                  <ItemPredictions
-                    className={
-                      currentChoice != null &&
-                      item.bbox[0] === currentChoice.bbox[0]
-                        ? "active"
-                        : ""
-                    }
-                    onClick={() => choiceObject(item)}
+          <Predictions>
+            {!!currentChoice && (
+              <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4">
+                <div className="icon text-mess">{sentence[0]}</div>
+                <div
+                  className={`icon-circle talk ${isSpeak ? "active" : ""}`}
+                  onClick={speakText}
+                >
+                  <audio
+                    id="audioPlayback"
+                    controls
+                    style={{ display: "none" }}
                   >
-                    <span>{item.class}</span>
-                  </ItemPredictions>
-                ))}
-            </ListPredictions>
-            <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
-              {data.length > 3 && <img src={Next} alt="next" />}
-            </Navigate>
+                    <source id="audioSource" type="audio/mp3" src="" />
+                  </audio>
+                  <img src={TalkIcon} alt="" />
+                </div>
+                <div className="icon-circle cancel-mess">
+                  <img src={CancelMess} alt="" />
+                </div>
+                <div className="keyboard">
+                  <img src={Keyboard} alt="" />
+                </div>
+              </div>
+            )}
+            <div className="d-flex w-100">
+              <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
+                {data.length > 3 && <img src={Back} alt="back" />}
+              </Navigate>
+              <ListPredictions id={"listPredictions"}>
+                {data.length > 0 &&
+                  data.map((item) => (
+                    <ItemPredictions
+                      className={
+                        currentChoice != null &&
+                        item.bbox[0] === currentChoice.bbox[0]
+                          ? "active"
+                          : ""
+                      }
+                      onClick={() => choiceObject(item)}
+                    >
+                      <span>{item.class}</span>
+                    </ItemPredictions>
+                  ))}
+              </ListPredictions>
+              <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
+                {data.length > 3 && <img src={Next} alt="next" />}
+              </Navigate>
+            </div>
           </Predictions>
         </Row>
         {!isReady && (
