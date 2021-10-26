@@ -149,6 +149,7 @@ const DefaultCamera = (props) => {
   const [currentChoice, setCurrentChoice] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [isSpeak, setIsSpeak] = useState(false);
+  const [isWaitingSpeak, setIsWaitingSpeak] = useState(false);
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
@@ -368,6 +369,7 @@ const DefaultCamera = (props) => {
 
   // speaker
   const speakText = () => {
+    setIsWaitingSpeak(true);
     connect();
 
     // Create the Polly service object and presigner object
@@ -394,6 +396,7 @@ const DefaultCamera = (props) => {
       if (error) {
         console.log("error polly speak ", error);
       } else {
+        setIsWaitingSpeak(false);
         pollyaudioplay(url).then(function () {
           setTimeout(() => {
             setIsSpeak(false);
@@ -478,7 +481,11 @@ const DefaultCamera = (props) => {
                   >
                     <source id="audioSource" type="audio/mp3" src="" />
                   </audio>
-                  <img src={TalkIcon} alt="" />
+                  {isWaitingSpeak ? (
+                    <img src={Spinner} alt="" />
+                  ) : (
+                    <img src={TalkIcon} alt="" />
+                  )}
                 </div>
                 <div className="icon-circle cancel-mess">
                   <img src={CancelMess} alt="" />
