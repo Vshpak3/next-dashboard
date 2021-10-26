@@ -6,13 +6,14 @@ import "@tensorflow/tfjs";
 import "../assets/style.css";
 import "react-simple-keyboard/build/css/index.css";
 import { withRouter, useHistory } from "react-router-dom";
+import Keyboard from "react-simple-keyboard";
 import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
 import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
-import Keyboard from "../assets/ketboardIcon.png";
+import KeyboardIcon from "../assets/ketboardIcon.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
@@ -144,14 +145,13 @@ const getWindowSize = () => {
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
   const [sentence, setSentence] = useState([]);
-  const [parent, setParent] = useState(false);
   const [model, setModel] = useState(null);
   const [currentChoice, setCurrentChoice] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [isSpeak, setIsSpeak] = useState(false);
-
-  let sentenceList = [];
-  let history = useHistory();
+  const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
+  const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
+  const [inputKeyboard, setInputKeyboard] = useState("");
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -283,6 +283,9 @@ const DefaultCamera = (props) => {
 
   const choiceObject = (objectChoice) => {
     // did not choice object
+    setIsOpenKeyboard(false);
+    setIsSpeak(false);
+    setInputKeyboard("");
     if (currentChoice == null) {
       stopDetect();
 
@@ -368,7 +371,10 @@ const DefaultCamera = (props) => {
     connect();
 
     // Create the Polly service object and presigner object
-    const finalData = { ...initSpeak, Text: sentence[0] };
+    const finalData = {
+      ...initSpeak,
+      Text: inputKeyboard ? inputKeyboard : sentence[0],
+    };
     console.log("Final Polly Data", finalData);
 
     if (finalData.Text !== "") {
@@ -413,11 +419,21 @@ const DefaultCamera = (props) => {
       IdentityPoolId: "us-east-1:47c46f2d-f5b1-4857-9d20-27b64cf32b2c",
     });
   };
-
-  const getList = () => {
-    setSentence(sentenceList);
+  // keyboard
+  const onChange = (input) => {
+    setInputKeyboard(input);
   };
-  console.log({ sentenceList });
+
+  const handleShift = () => {
+    const newLayoutName =
+      currentLayoutKeyboard === "default" ? "shift" : "default";
+    setCurrentLayoutKeyboard(newLayoutName);
+  };
+  const onKeyPress = (button) => {
+    // If you want to handle the shift and caps lock buttons
+    if (button === "{shift}" || button === "{lock}") handleShift();
+  };
+
   const nextItem = () => {
     document.getElementById("listPredictions").scrollLeft += 500;
   };
@@ -426,9 +442,11 @@ const DefaultCamera = (props) => {
     document.getElementById("listPredictions").scrollLeft -= 500;
   };
 
+  console.log(inputKeyboard);
+
   return (
     <React.Fragment>
-      <Container style={{ display: parent && "none" }} fluid={true}>
+      <Container fluid={true}>
         <Row>
           <Col>
             <video
@@ -446,7 +464,9 @@ const DefaultCamera = (props) => {
           <Predictions>
             {!!currentChoice && (
               <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4">
-                <div className="icon text-mess">{sentence[0]}</div>
+                <div className="icon text-mess">
+                  {inputKeyboard !== "" ? inputKeyboard : sentence[0]}
+                </div>
                 <div
                   className={`icon-circle talk ${isSpeak ? "active" : ""}`}
                   onClick={speakText}
@@ -463,8 +483,11 @@ const DefaultCamera = (props) => {
                 <div className="icon-circle cancel-mess">
                   <img src={CancelMess} alt="" />
                 </div>
-                <div className="keyboard">
-                  <img src={Keyboard} alt="" />
+                <div
+                  className="keyboard"
+                  onClick={() => setIsOpenKeyboard(!isOpenKeyboard)}
+                >
+                  <img src={KeyboardIcon} alt="" />
                 </div>
               </div>
             )}
@@ -474,7 +497,7 @@ const DefaultCamera = (props) => {
               </Navigate>
               <ListPredictions id={"listPredictions"}>
                 {data.length > 0 &&
-                  data.map((item) => (
+                  data.map((item, index) => (
                     <ItemPredictions
                       className={
                         currentChoice != null &&
@@ -482,6 +505,7 @@ const DefaultCamera = (props) => {
                           ? "active"
                           : ""
                       }
+                      key={index}
                       onClick={() => choiceObject(item)}
                     >
                       <span>{item.class}</span>
@@ -505,6 +529,15 @@ const DefaultCamera = (props) => {
               <img src={Spinner} alt="" />
             </div>
           </div>
+        )}
+        {isOpenKeyboard && (
+          <Keyboard
+            // keyboardRef={(r) => onChange(r)}
+            layoutName={currentLayoutKeyboard}
+            onChange={onChange}
+            onKeyPress={onKeyPress}
+            value={inputKeyboard}
+          />
         )}
       </Container>
     </React.Fragment>

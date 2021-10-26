@@ -82,13 +82,16 @@
 
 .simple-keyboard {
   max-width: 550px;
+  position: fixed;
+  bottom: 40%;
+  right: 4rem;
 }
 .suggestion-Wrapper{
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  padding: 10px;;
+  padding: 10px;
   margin-top: 830px;
   margin-left: 50px;
   width: 70%;
@@ -371,6 +374,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 .keyboard img {
   width: 40%;
