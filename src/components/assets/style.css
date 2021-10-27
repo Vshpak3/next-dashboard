@@ -393,3 +393,48 @@
   background-color: #ED157F;
   color: #ffffff;
 }
+.control-hardware {
+  position: fixed;
+  width: 100%;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.slow-left img, .slow-right img, .fast-right img, .fast-left img {
+  height: 90px;
+}
+.center img {
+  width: 90px;
+}
+.control-hardware .fast-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware div {
+  cursor: pointer;
+}
+.control-hardware .slow-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware .center {
+  flex: 2;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.control-hardware .slow-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware .fast-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}

@@ -10,6 +10,10 @@ import Keyboard from "react-simple-keyboard";
 import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
+import Top from "../assets/top.png";
+import Bottom from "../assets/bottom.png";
+import FastLeft from "../assets/fast-left.png";
+import FastRight from "../assets/fast-right.png";
 import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
@@ -153,6 +157,7 @@ const DefaultCamera = (props) => {
   const [isWaitingSpeak, setIsWaitingSpeak] = useState(false);
   const [isShowList, setIsShowList] = useState(false);
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
+  const [isOpenControl, setIsOpenControl] = useState(false);
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
 
@@ -623,6 +628,38 @@ const DefaultCamera = (props) => {
             value={inputKeyboard}
           />
         )}
+        {isOpenControl && (
+          <div className="control-hardware">
+            <div className="fast-left">
+              <img src={FastLeft} alt="" />
+            </div>
+            <div className="slow-left">
+              <img src={Back} alt="" />
+            </div>
+            <div className="center">
+              <div className="top">
+                <img src={Top} alt="" />
+              </div>
+              <div className="bottom">
+                <img src={Bottom} alt="" />
+              </div>
+            </div>
+            <div className="slow-right">
+              <img src={Next} alt="" />
+            </div>
+            <div className="fast-right">
+              <img src={FastRight} alt="" />
+            </div>
+          </div>
+        )}
+        <Focus>
+          <ItemPredictions
+            className={`button_click_cursor ${isOpenControl ? "active" : ""}`}
+            onClick={() => setIsOpenControl(!isOpenControl)}
+          >
+            <span>{isOpenControl ? "Disable" : "Enable"} control</span>
+          </ItemPredictions>
+        </Focus>
       </Container>
     </React.Fragment>
   );
