@@ -147,9 +147,11 @@ const DefaultCamera = (props) => {
   const [sentence, setSentence] = useState([]);
   const [model, setModel] = useState(null);
   const [currentChoice, setCurrentChoice] = useState(null);
+  const [currentText, setCurrentText] = useState("");
   const [isReady, setIsReady] = useState(false);
   const [isSpeak, setIsSpeak] = useState(false);
   const [isWaitingSpeak, setIsWaitingSpeak] = useState(false);
+  const [isShowList, setIsShowList] = useState(false);
   const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
@@ -166,6 +168,10 @@ const DefaultCamera = (props) => {
     getSentenceData();
     getModel();
   }, []);
+
+  useEffect(() => {
+    sentence.length > 0 && setCurrentText(sentence[0]);
+  }, [sentence]);
 
   const getModel = async () => {
     try {
@@ -214,6 +220,7 @@ const DefaultCamera = (props) => {
 
   const readTextFile = (file) => {
     var rawFile = new XMLHttpRequest();
+    let result = "";
     rawFile.open("GET", file, false);
     rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4) {
@@ -222,11 +229,13 @@ const DefaultCamera = (props) => {
           //
           // console.log(rawFile.responseText);
           // getList();
-          setSentence([...sentence, rawFile.responseText]);
+          // setSentence([...sentence, rawFile.responseText]);
+          result = rawFile.responseText;
         }
       }
     };
     rawFile.send(null);
+    return result;
   };
 
   const getFileList = async () => {
@@ -245,12 +254,18 @@ const DefaultCamera = (props) => {
     fileList.map((r) => {
       list.push(r.key);
     });
+    let listText = [];
 
     for (let i = 0; i < list.length, i < 7; i++) {
       await Storage.get(`${list[i]}`, { level: "public" })
-        .then((result) => readTextFile(result))
+        .then((result) => {
+          const text = readTextFile(result);
+          listText.push(text);
+        })
         .catch((err) => console.log(err));
     }
+
+    setSentence(listText);
   };
 
   const requestAnimationFrameRef = useRef(null);
@@ -368,14 +383,14 @@ const DefaultCamera = (props) => {
   };
 
   // speaker
-  const speakText = () => {
+  const speakText = (text) => {
     setIsWaitingSpeak(true);
     connect();
 
     // Create the Polly service object and presigner object
     const finalData = {
       ...initSpeak,
-      Text: inputKeyboard ? inputKeyboard : sentence[0],
+      Text: inputKeyboard ? inputKeyboard : text,
     };
     console.log("Final Polly Data", finalData);
 
@@ -445,7 +460,21 @@ const DefaultCamera = (props) => {
     document.getElementById("listPredictions").scrollLeft -= 500;
   };
 
-  console.log(inputKeyboard);
+  const toggleShowList = () => {
+    if (isShowList) {
+      setIsShowList(false);
+    } else {
+      setIsShowList(true);
+      setIsOpenKeyboard(false);
+      setCurrentText("");
+      setInputKeyboard("");
+    }
+  };
+
+  const choiceTextSpeak = (text) => {
+    setCurrentText(text);
+    speakText(text);
+  };
 
   return (
     <React.Fragment>
@@ -466,13 +495,34 @@ const DefaultCamera = (props) => {
 
           <Predictions>
             {!!currentChoice && (
-              <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4">
-                <div className="icon text-mess">
-                  {inputKeyboard !== "" ? inputKeyboard : sentence[0]}
+              <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4 align-items-end">
+                <div>
+                  {isShowList && (
+                    <div className="list-suggestion">
+                      {sentence
+                        .filter((item) => item !== sentence[0])
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`text-bg my-2 button_click_cursor ${
+                              item === currentText ? "active" : ""
+                            }`}
+                            onClick={() => choiceTextSpeak(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  {!isShowList && (
+                    <div className="icon text-mess text-bg">
+                      {inputKeyboard !== "" ? inputKeyboard : sentence[0]}
+                    </div>
+                  )}
                 </div>
                 <div
                   className={`icon-circle talk ${isSpeak ? "active" : ""}`}
-                  onClick={speakText}
+                  onClick={() => speakText(currentText)}
                 >
                   <audio
                     id="audioPlayback"
@@ -487,7 +537,12 @@ const DefaultCamera = (props) => {
                     <img src={TalkIcon} alt="" />
                   )}
                 </div>
-                <div className="icon-circle cancel-mess">
+                <div
+                  className={`icon-circle cancel-mess ${
+                    isShowList ? "active" : ""
+                  }`}
+                  onClick={() => toggleShowList()}
+                >
                   <img src={CancelMess} alt="" />
                 </div>
                 <div

@@ -345,12 +345,15 @@
   mix-blend-mode: hard-light;
 }
 .action-list .text-mess {
+  height: 70px;
+  position: relative;
+  margin-right: 60px;
+}
+.action-list .text-bg {
   background: #ffffffb8;
   mix-blend-mode: hard-light;
   border-radius: 10px;
   padding: 10px 20px;
-  position: relative;
-  margin-right: 60px;
 }
 .text-mess:after {
   content: '';
@@ -383,6 +386,10 @@
 .icon-circle img {
   width: 60%;
 }
-.talk.active {
+.icon-circle.active {
   background-color: #ED157F;
+}
+.text-bg.active {
+  background-color: #ED157F;
+  color: #ffffff;
 }
