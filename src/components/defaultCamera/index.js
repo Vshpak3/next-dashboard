@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Container, Row, Col } from "reactstrap";
 import Amplify, { Storage } from "aws-amplify";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
@@ -161,6 +161,7 @@ const DefaultCamera = (props) => {
 
   const camWidthRef = useRef(null);
   const camHeightRef = useRef(null);
+  const requestAnimationFrameRef = useRef(null);
 
   const video = useRef(null);
 
@@ -168,10 +169,6 @@ const DefaultCamera = (props) => {
     getSentenceData();
     getModel();
   }, []);
-
-  useEffect(() => {
-    sentence.length > 0 && setCurrentText(sentence[0]);
-  }, [sentence]);
 
   const getModel = async () => {
     try {
@@ -240,7 +237,7 @@ const DefaultCamera = (props) => {
 
   const getFileList = async () => {
     // let fileList = [];
-    let data = Storage.list("sen_") // for listing ALL files without prefix, pass '' instead
+    let data = Storage.list("sen_v2") // for listing ALL files without prefix, pass '' instead
       .then((result) => {
         return result;
       })
@@ -256,19 +253,16 @@ const DefaultCamera = (props) => {
     });
     let listText = [];
 
-    for (let i = 0; i < list.length, i < 7; i++) {
+    for (let i = 0; i < list.length; i++) {
       await Storage.get(`${list[i]}`, { level: "public" })
         .then((result) => {
-          const text = readTextFile(result);
-          listText.push(text);
+          listText = JSON.parse(readTextFile(result));
         })
         .catch((err) => console.log(err));
     }
 
     setSentence(listText);
   };
-
-  const requestAnimationFrameRef = useRef(null);
 
   const detectFrame = (video, model) => {
     model.detect(video).then((predictions) => {
@@ -312,16 +306,42 @@ const DefaultCamera = (props) => {
     else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
       stopDetect();
 
+      setIsShowList(false);
+      setInputKeyboard("");
+      setIsOpenKeyboard(false);
       setCurrentChoice(objectChoice);
       renderPredictions(data, objectChoice);
     }
     // dont choice object
     else {
       startDetect(model);
+
+      setIsShowList(false);
+      setInputKeyboard("");
+      setIsOpenKeyboard(false);
       setCurrentChoice(null);
       clearCanvas();
     }
   };
+
+  const sentenceOfCurrent = useMemo(() => {
+    if (!sentence || !currentChoice) return [];
+
+    const obSentenceOfCurrent = sentence.find(
+      (textOfObject) => textOfObject.type == currentChoice.class
+    );
+    const defaultSentence = sentence.find(
+      (textOfObject) => textOfObject.type == "default"
+    );
+    // return default sentence text
+    if (!obSentenceOfCurrent) return defaultSentence?.sentence;
+    // return default and current sentence text
+    return [...obSentenceOfCurrent?.sentence, ...defaultSentence?.sentence];
+  }, [sentence, currentChoice]);
+
+  useEffect(() => {
+    sentenceOfCurrent.length > 0 && setCurrentText(sentenceOfCurrent[0]);
+  }, [sentenceOfCurrent]);
 
   const renderPredictions = (predictions, currentChoice) => {
     const c = document.getElementById("canvas");
@@ -499,8 +519,8 @@ const DefaultCamera = (props) => {
                 <div>
                   {isShowList && (
                     <div className="list-suggestion">
-                      {sentence
-                        .filter((item) => item !== sentence[0])
+                      {sentenceOfCurrent
+                        .filter((item) => item !== sentenceOfCurrent[0])
                         .map((item, index) => (
                           <div
                             key={index}
@@ -516,7 +536,9 @@ const DefaultCamera = (props) => {
                   )}
                   {!isShowList && (
                     <div className="icon text-mess text-bg">
-                      {inputKeyboard !== "" ? inputKeyboard : sentence[0]}
+                      {inputKeyboard !== ""
+                        ? inputKeyboard
+                        : sentenceOfCurrent[0]}
                     </div>
                   )}
                 </div>
