@@ -22,6 +22,9 @@ import KeyboardIcon from "../assets/ketboardIcon.png";
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
+import useControlCamera from "../camera/useControlCamera";
+import CameraInfo from "../camera/cameraInfo";
+import jQuery from "jquery";
 
 const remote = window.require("electron").remote;
 
@@ -160,6 +163,7 @@ const DefaultCamera = (props) => {
   const [isOpenControl, setIsOpenControl] = useState(false);
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
+  const [image, setImage] = useState();
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -170,10 +174,139 @@ const DefaultCamera = (props) => {
 
   const video = useRef(null);
 
+  const {
+    mouseOverTop,
+    mouseOverSlowRight,
+    mouseOverSlowLeft,
+    mouseOverFastRight,
+    mouseOverFastLeft,
+    mouseOverBottom,
+    stop,
+  } = useControlCamera();
+
+  const { options } = CameraInfo();
+
   useEffect(() => {
-    getSentenceData();
-    getModel();
+    // getSentenceData();
+    // getModel();
   }, []);
+
+  const cacheHttpCameraCredentials = (
+    url,
+    username,
+    password,
+    sender = "default"
+  ) => {
+    // Cache http user/pass for cameras
+    jQuery.ajax({
+      type: "GET",
+      url: url,
+      username: username,
+      password: password,
+      success: function (data) {
+        //Success block
+        console.log("Cached webserver camera credentials: " + sender);
+      },
+      error: function (xhr, ajaxOptions, throwError) {
+        //Error block
+        console.log("Error caching camera credentials: " + sender);
+      },
+    });
+  };
+
+  async function startStream(stream) {
+    // mediaStream = stream;
+
+    console.log({ video });
+    setIsReady(true);
+    //if (typeof video.srcObject !== "undefined") {
+    video.current.srcObject = stream;
+    //} else {
+    //  video.src = URL.createObjectURL(stream);
+    //}
+    video.current.onloadedmetadata = () => {
+      //camWidthRef.current = video.videoWidth;
+      //camHeightRef.current = video.videoHeight;
+      video.current.play();
+      //resolve();
+    };
+  }
+
+  const launchCamera = () => {
+    console.log("launched");
+    debugger;
+    let currentIPCam = localStorage.getItem("ipaddress");
+    let userName = localStorage.getItem("ipusername");
+    let password = localStorage.getItem("ippassword");
+    if (!!currentIPCam) {
+      cacheHttpCameraCredentials(currentIPCam, userName, password);
+      let image = new Image();
+      image.onload = function () {};
+      image.src = currentIPCam;
+
+      // previousIPaddress = currentIPCam;
+      startCanvas();
+      updateCanvas();
+    } else {
+      let currentCam = localStorage.getItem("address");
+      let constraints = {
+        video: {
+          width: screenwidth,
+          height: screenheight,
+          deviceId: {
+            exact: currentCam,
+          },
+        },
+      };
+      navigator.mediaDevices.getUserMedia(constraints).then(startStream);
+    }
+  };
+
+  function updateCanvas() {
+    const c = document.getElementById("canvas");
+    let ctx = c.getContext("2d");
+    // let aspect = video.videoHeight / video.videoWidth;
+    // let width = 800;
+    // let height = 600;
+    // if (!localStorage.getItem("ipaddress")) height = Math.round(width * aspect);
+    // c.width = width;
+    // c.height = height;
+
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (!!localStorage.getItem("ipaddress")) {
+      try {
+        let image = new Image();
+        image.onload = function () {
+          console.log("Image loaded");
+        };
+        image.src = localStorage.getItem("ipaddress");
+        ctx.drawImage(image, 0, 0, c.width, c.height);
+        image.width = c.width;
+        image.height = c.height;
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      // ctx.drawImage(videoContainer.video, 0, 0, canvas.width, canvas.height);
+      //
+      // video.width = width;
+      // video.height = height;
+      // if (model) {
+      //   model.detect(video).then((predictions) => {
+      //     drawVideoPredictions(predictions);
+      //     if (video.srcObject.active) {
+      //       // requestAnimationFrame(detectFrame);
+      //     }
+      //   });
+      // }
+    }
+
+    requestAnimationFrame(updateCanvas);
+  }
+
+  const startCanvas = () => {
+    requestAnimationFrame(updateCanvas);
+  };
 
   const getModel = async () => {
     try {
@@ -221,7 +354,7 @@ const DefaultCamera = (props) => {
   };
 
   const readTextFile = (file) => {
-    var rawFile = new XMLHttpRequest();
+    let rawFile = new XMLHttpRequest();
     let result = "";
     rawFile.open("GET", file, false);
     rawFile.onreadystatechange = function () {
@@ -428,8 +561,8 @@ const DefaultCamera = (props) => {
         .catch((err) => console.log(err));
     }
 
-    var polly = new AWS.Polly({ apiVersion: "2016-06-10" });
-    var signer = new AWS.Polly.Presigner(finalData, polly);
+    let polly = new AWS.Polly({ apiVersion: "2016-06-10" });
+    let signer = new AWS.Polly.Presigner(finalData, polly);
 
     // Create presigned URL of synthesized speech file
     signer.getSynthesizeSpeechUrl(finalData, function (error, url) {
@@ -630,35 +763,111 @@ const DefaultCamera = (props) => {
         )}
         {isOpenControl && (
           <div className="control-hardware">
-            <div className="fast-left">
+            <div
+              className="fast-left"
+              onMouseOver={() => mouseOverFastLeft()}
+              onMouseUp={() => stop()}
+            >
               <img src={FastLeft} alt="" />
             </div>
-            <div className="slow-left">
+            <div
+              className="slow-left"
+              onMouseOver={() => mouseOverSlowLeft()}
+              onMouseUp={() => stop()}
+            >
               <img src={Back} alt="" />
             </div>
             <div className="center">
-              <div className="top">
+              <div
+                className="top"
+                onMouseOver={() => mouseOverTop()}
+                onMouseUp={() => stop()}
+              >
                 <img src={Top} alt="" />
               </div>
-              <div className="bottom">
+              <div
+                className="bottom"
+                onMouseOver={() => mouseOverBottom()}
+                onMouseUp={() => stop()}
+              >
                 <img src={Bottom} alt="" />
               </div>
             </div>
-            <div className="slow-right">
+            <div
+              className="slow-right"
+              onMouseOver={() => mouseOverSlowRight()}
+              onMouseUp={() => stop()}
+            >
               <img src={Next} alt="" />
             </div>
-            <div className="fast-right">
+            <div
+              className="fast-right"
+              onMouseOver={() => mouseOverFastRight()}
+              onMouseUp={() => stop()}
+            >
               <img src={FastRight} alt="" />
             </div>
           </div>
         )}
         <Focus>
-          <ItemPredictions
-            className={`button_click_cursor ${isOpenControl ? "active" : ""}`}
-            onClick={() => setIsOpenControl(!isOpenControl)}
+          {/*<ItemPredictions*/}
+          {/*  className={`button_click_cursor ${isOpenControl ? "active" : ""}`}*/}
+          {/*  onClick={() => setIsOpenControl(!isOpenControl)}*/}
+          {/*>*/}
+          {/*  <span>{isOpenControl ? "Disable" : "Enable"} control</span>*/}
+          {/*</ItemPredictions>*/}
+
+          <div className="input-data">
+            <select
+              name=""
+              id=""
+              onChange={(e) => localStorage.setItem("address", e.target.value)}
+            >
+              {!!options &&
+                options.map((option) => (
+                  <option value={option.value}>{option.text}</option>
+                ))}
+            </select>
+          </div>
+          <input
+            type="text"
+            placeholder="ipCameraSource"
+            onChange={(e) => localStorage.setItem("ipaddress", e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="ipUserName"
+            onChange={(e) => localStorage.setItem("ipusername", e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="ipPassword"
+            onChange={(e) => localStorage.setItem("ippassword", e.target.value)}
+          />
+          <select
+            name=""
+            id=""
+            onChange={(e) => localStorage.setItem("cameraType", e.target.value)}
           >
-            <span>{isOpenControl ? "Disable" : "Enable"} control</span>
-          </ItemPredictions>
+            <option value="" selected>
+              Select camera type
+            </option>
+            <option
+              value="webcam"
+              selected={localStorage.getItem("cameraType") === "webcam"}
+            >
+              Webcam
+            </option>
+            <option
+              value="arduino - bldc"
+              selected={localStorage.getItem("cameraType") === "arduino - bldc"}
+            >
+              Loro 1.0 device
+            </option>
+            {/*<option value="arduino - servo">arduino - servo</option>*/}
+            {/*<option value="raspberrypi">raspberrypi</option>*/}
+          </select>
+          <button onClick={() => launchCamera()}>Apply</button>
         </Focus>
       </Container>
     </React.Fragment>
