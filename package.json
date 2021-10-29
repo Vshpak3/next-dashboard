@@ -49,7 +49,8 @@
     "dev": "concurrently -k \"yarn start\" \"yarn:electron\"",
     "electron": "wait-on tcp:3000 && electron .",
     "package": "electron-builder build --win -c.extraMetadata.main=build/electron.js --publish never",
-    "package-mac": "electron-builder build --mac -c.extraMetadata.main=build/electron.js --publish never"
+    "package-mac": "electron-builder build --mac -c.extraMetadata.main=build/electron.js --publish never",
+    "install": "electron-rebuild"
   },
   "eslintConfig": {
     "extends": [
