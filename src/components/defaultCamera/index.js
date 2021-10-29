@@ -67,6 +67,7 @@ const Predictions = styled.div`
   position: fixed;
   bottom: 12%;
   display: flex;
+  z-index: 100;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
