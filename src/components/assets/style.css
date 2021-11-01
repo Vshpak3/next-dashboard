@@ -5,6 +5,13 @@
   display: block;
   cursor: auto;
 }
+#canvas1 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  cursor: auto;
+}
 
 #video {
   position: fixed;
@@ -387,10 +394,10 @@
   width: 60%;
 }
 .icon-circle.active {
-  background-color: #ED157F;
+  background-color: #e60000;
 }
 .text-bg.active {
-  background-color: #ED157F;
+  background-color: #e60000;
   color: #ffffff;
 }
 .control-hardware {

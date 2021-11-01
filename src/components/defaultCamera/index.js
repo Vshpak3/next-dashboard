@@ -23,6 +23,7 @@ import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
 import useControlCamera from "../camera/useControlCamera";
+import Footer from "./footer";
 
 const remote = window.require("electron").remote;
 
@@ -61,7 +62,7 @@ const initSpeak = {
 
 const Predictions = styled.div`
   position: fixed;
-  bottom: 10%;
+  bottom: 12%;
   display: flex;
   left: 50%;
   transform: translateX(-50%);
@@ -70,6 +71,7 @@ const Predictions = styled.div`
   & > div > div {
     margin: 0 20px;
   }
+  z-index: 2;
 `;
 
 const Action = styled.div`
@@ -101,7 +103,7 @@ const ItemPredictions = styled.div`
     margin-right: 0;
   }
   &.active {
-    background: #ed157f;
+    background: red;
   }
 `;
 
@@ -182,8 +184,6 @@ const DefaultCamera = (props) => {
     stop,
   } = useControlCamera();
 
-  
-
   useEffect(() => {
     init();
   }, []);
@@ -192,13 +192,13 @@ const DefaultCamera = (props) => {
     await getDeviceList();
     getSentenceData();
     getModel();
-  }
+  };
 
   const getDeviceList = async () => {
     let list = [];
     if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      
+
       for (let i = 0; i < devices.length; i += 1) {
         if (devices[i].kind === "videoinput") {
           list.push(devices[i].deviceId);
@@ -225,7 +225,7 @@ const DefaultCamera = (props) => {
   };
 
   const loadVideo = (video) => {
-    if (!camera.current) return
+    if (!camera.current) return;
     const webCamPromise = navigator.mediaDevices
       .getUserMedia({
         audio: false,
@@ -421,7 +421,7 @@ const DefaultCamera = (props) => {
           width = (width * currentCamWidth) / camWidth;
           height = (height * currentCamHeight) / camHeight;
           // Draw the bounding box.
-          ctx.strokeStyle = "#ED157F";
+          ctx.strokeStyle = "red";
           ctx.lineWidth = 4;
           ctx.strokeRect(x, y, width, height);
           // Draw the label background.
@@ -538,6 +538,55 @@ const DefaultCamera = (props) => {
     speakText(text);
   };
 
+  // take a photo
+  const takePhoto = () => {
+    let video = document.getElementById("video");
+    let canvas1 = document.getElementById("canvas1");
+    let photo = document.getElementById("photo");
+    let width = 1366;
+    let height = 768;
+    let streaming = false;
+    loadVideo(video).then(() => {
+      video.addEventListener(
+        "canplay",
+        function (ev) {
+          if (!streaming) {
+            height = video.videoHeight / (video.videoWidth / width);
+
+            if (isNaN(height)) {
+              height = width / (4 / 3);
+            }
+
+            // video.setAttribute("width", screenwidth);
+            // video.setAttribute("height", screenheight);
+            canvas1.setAttribute("width", width);
+            canvas1.setAttribute("height", height);
+            streaming = true;
+            let context = canvas1.getContext("2d");
+            canvas1.width = width;
+            canvas1.height = height;
+            context.drawImage(video, 0, 0, width, height);
+            let data = canvas1.toDataURL("image/png");
+            photo.setAttribute("name", Date.now());
+            photo.setAttribute("src", data);
+            let link = document.createElement("a");
+            link.href = photo.src;
+            link.download = `${photo.name}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            // window.location.reload();
+            photo.removeAttribute("name");
+            photo.removeAttribute("src");
+            canvas1.removeAttribute("width");
+            canvas1.removeAttribute("height");
+          }
+        },
+        false
+      );
+    });
+  };
+
   return (
     <React.Fragment>
       <Container fluid={true}>
@@ -550,6 +599,7 @@ const DefaultCamera = (props) => {
               ref={(node) => (video.current = node)}
             />
             <canvas id="canvas" width={screenwidth} height={screenheight} />
+            <canvas id="canvas1" width={screenwidth} height={screenheight} />
             <div className="output">
               <img id="photo" />
             </div>
@@ -665,7 +715,7 @@ const DefaultCamera = (props) => {
             value={inputKeyboard}
           />
         )}
-        {(
+        {isReady && (
           <div className="control-hardware">
             <div
               className="fast-left"
@@ -713,6 +763,7 @@ const DefaultCamera = (props) => {
             </div>
           </div>
         )}
+        {isReady && <Footer takePhoto={takePhoto} />}
       </Container>
     </React.Fragment>
   );
