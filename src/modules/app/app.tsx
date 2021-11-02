@@ -9,6 +9,7 @@ import Amplify from "aws-amplify";
 import { LoginContainer } from "../login/containers/login";
 import { SignUpContainer } from "../sign-up/container/sign-up";
 import { UserProfileContainer } from "../user-profile/containers/user-profile";
+import ResetPassword from "../reset-password/components/reset-password";
 import DefaultCamera from "../../components/defaultCamera";
 import TextToSpeech from "../../components/text-to-speech";
 import KeyboardDemo from "../../components/keyboard/keyboard";
@@ -33,7 +34,7 @@ export const App: React.FC<AppProps> = () => {
   const handleSuccessLogin = (
     accessToken: string,
     refreshToken: string,
-    remember: boolean,
+    remember: boolean
   ): void => {
     if (remember) {
       localStorage.setItem("access-token", accessToken);
@@ -50,7 +51,11 @@ export const App: React.FC<AppProps> = () => {
           path="/text-to-speech"
           component={TextToSpeech}
         />
-        <RouterDom.Route exact path="/pollySpeaking" component={PollySpeaking} />
+        <RouterDom.Route
+          exact
+          path="/pollySpeaking"
+          component={PollySpeaking}
+        />
         <RouterDom.Route
           path={routes.onboarding}
           component={() =>
@@ -66,6 +71,17 @@ export const App: React.FC<AppProps> = () => {
                 onLeftClick={goToOnboarding}
                 onSuccessSignIn={handleSuccessLogin}
               />
+            ) : (
+              <Redirect to={routes.main} />
+            );
+          }}
+        />
+        <RouterDom.Route
+          path={routes.resetPassword}
+          render={({ history }) => {
+            const goToLogin = (): void => history.push(routes.login);
+            return !isAuthorized ? (
+              <ResetPassword onLeftClick={goToLogin} />
             ) : (
               <Redirect to={routes.main} />
             );
