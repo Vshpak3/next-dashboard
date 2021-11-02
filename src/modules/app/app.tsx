@@ -14,6 +14,7 @@ import DefaultCamera from "../../components/defaultCamera";
 import TextToSpeech from "../../components/text-to-speech";
 import KeyboardDemo from "../../components/keyboard/keyboard";
 import PollySpeaking from "../../components/defaultCamera/pollySpeaking";
+import ConfirmCode from "../reset-password/components/confirm-code";
 
 const Container = styled("div")``;
 
@@ -78,10 +79,19 @@ export const App: React.FC<AppProps> = () => {
         />
         <RouterDom.Route
           path={routes.resetPassword}
-          render={({ history }) => {
-            const goToLogin = (): void => history.push(routes.login);
+          render={() => {
             return !isAuthorized ? (
-              <ResetPassword onLeftClick={goToLogin} />
+              <ResetPassword />
+            ) : (
+              <Redirect to={routes.main} />
+            );
+          }}
+        />
+        <RouterDom.Route
+          path={routes.confirmCode}
+          render={() => {
+            return !isAuthorized ? (
+              <ConfirmCode />
             ) : (
               <Redirect to={routes.main} />
             );

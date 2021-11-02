@@ -23,9 +23,7 @@ const ContentWrapper = styled("div")`
 `;
 
 const Content = styled("div")`
-  margin-top: 90px;
   width: 2960px;
-  height: 2197px;
   transform: scale(0.4) translate(-50%, -50%);
   transform-origin: left top;
   position: absolute;
@@ -36,7 +34,6 @@ const Content = styled("div")`
 `;
 
 const LogoIconWrapper = styled("div")`
-  margin-top: 192px;
   text-align: center;
 `;
 
@@ -77,6 +74,7 @@ const SwitcherWrapper = styled("div")`
   margin-top: 72px;
   .reset-pass {
     cursor: pointer;
+    text-decoration: underline;
   }
 `;
 
@@ -198,7 +196,7 @@ export const Login: React.FC<LoginProps> = ({
             {/*<p onClick={handleResetPasswordClick}>Reset password</p>*/}
             <SwitcherWrapper>
               <Label className="reset-pass" onClick={handleResetPasswordClick}>
-                Reset password
+                Forgot password
               </Label>
             </SwitcherWrapper>
             <SwitcherWrapper>

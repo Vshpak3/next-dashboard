@@ -9,7 +9,7 @@ export const Input = styled("input")`
   background: #ffffff;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.04), -1px 1px 2px rgba(0, 0, 0, 0.02);
   border-radius: 40px;
-  padding: 0 129px;
+  padding: 0 80px;
 
   font-style: normal;
   font-weight: normal;
@@ -87,7 +87,7 @@ export const TimeZoneInput: React.FC<TimeZoneInputProps> = ({
   }, [value]);
   const handleChange = (): void => setTimeZone((v) => v);
   const inputValue = `EST (UTC ${timeZone >= 0 ? "+" : "-"} ${Math.abs(
-    timeZone,
+    timeZone
   )})`;
   const handleUp = (): void => {
     setTimeZone((v) => {

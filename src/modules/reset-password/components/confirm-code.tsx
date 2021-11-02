@@ -1,15 +1,16 @@
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import styled from "styled-components";
 import { LogoIcon } from "../../../common/logo-icon";
 import { Input } from "../../../common/input";
 import { LeftArrowIcon } from "../../../common/left-arrow-icon";
 import { RightArrowIcon } from "../../../common/right-arrow-icon";
 import { Loader } from "../../../common/loader";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useResetPassword from "../hooks/useResetPassword";
 import { useHistory } from "react-router-dom";
 import { routes } from "../../app/contants";
+
 const Container = styled("div")`
   width: 100vw;
   height: 100vh;
@@ -22,12 +23,19 @@ const ContentWrapper = styled("div")`
   background: linear-gradient(to bottom, white 50%, #e60000 50%);
 `;
 
+const PasswordWrapper = styled("div")`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 72px;
+`;
+
 const Content = styled("div")`
   width: 2960px;
   transform: scale(0.4) translate(-50%, -50%);
   transform-origin: left top;
   position: absolute;
-  top: 45%;
+  top: 50%;
   left: 50%;
   display: flex;
   flex-direction: column;
@@ -88,10 +96,19 @@ const ArrowWrapper = styled("div")`
   }
 `;
 
-export interface ResetPasswordProps {}
+export interface ConfirmCodeProps {}
 
-const ResetPassword: React.FC<ResetPasswordProps> = ({}) => {
-  const { email, setEmail, isFetching, sendMailReset } = useResetPassword();
+const ConfirmCode: React.FC<ConfirmCodeProps> = () => {
+  const {
+    confirmCode,
+    setConfirmCode,
+    newPassword,
+    setNewPassword,
+    newPasswordConfirm,
+    setNewPasswordConfirm,
+    isFetching,
+    forgotPassword,
+  } = useResetPassword();
   const history = useHistory();
 
   return (
@@ -101,23 +118,41 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({}) => {
           <LogoIconWrapper>
             <LogoIcon />
           </LogoIconWrapper>
-          <Title>Reset password</Title>
+          <Title>Confirm code</Title>
           <BottomBlock>
             <UsernameWrapper>
-              <Label className="reset-pass">
-                Enter email to recover your account
-              </Label>
               <Input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                value={confirmCode}
+                onChange={(e) => setConfirmCode(e.target.value)}
+                placeholder="Code"
               />
             </UsernameWrapper>
+            <PasswordWrapper>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Password"
+              />
+            </PasswordWrapper>
+            <PasswordWrapper>
+              <Input
+                type="password"
+                value={newPasswordConfirm}
+                onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                placeholder="Confirm password"
+              />
+            </PasswordWrapper>
             <ArrowsWrapper>
-              <ArrowWrapper onClick={() => history.push(routes.login)}>
+              <ArrowWrapper
+                onClick={() => {
+                  history.push(routes.login);
+                  localStorage.removeItem("emailReset");
+                }}
+              >
                 <LeftArrowIcon />
               </ArrowWrapper>
-              <ArrowWrapper onClick={() => sendMailReset()}>
+              <ArrowWrapper onClick={() => forgotPassword()}>
                 <RightArrowIcon />
               </ArrowWrapper>
             </ArrowsWrapper>
@@ -130,4 +165,4 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({}) => {
   );
 };
 
-export default ResetPassword;
+export default ConfirmCode;
