@@ -5,7 +5,8 @@ import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import "../assets/style.css";
 import "react-simple-keyboard/build/css/index.css";
-import { withRouter, useHistory } from "react-router-dom";
+import jQuery from "jquery";
+import { withRouter, useHistory, Link } from "react-router-dom";
 import Keyboard from "react-simple-keyboard";
 import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
@@ -18,12 +19,14 @@ import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
+import SettingIcon from "../assets/setting.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
 import useControlCamera from "../camera/useControlCamera";
 import Footer from "./footer";
+import { routes } from "../../modules/app/contants";
 
 const remote = window.require("electron").remote;
 
@@ -170,9 +173,14 @@ const DefaultCamera = (props) => {
   const camWidthRef = useRef(null);
   const camHeightRef = useRef(null);
   const requestAnimationFrameRef = useRef(null);
+  const requestAnimationFrameIpCameraRef = useRef(null);
 
   const video = useRef(null);
   const camera = useRef(null);
+  const history = useHistory();
+  const isIPCamera =
+    !!localStorage.getItem("ipAddress") &&
+    localStorage.getItem("ipAddress") !== "";
 
   const {
     mouseOverTop,
@@ -208,21 +216,121 @@ const DefaultCamera = (props) => {
     camera.current = list.length == 0 ? null : list[0];
   };
 
-  const getModel = async () => {
-    try {
-      const webCamPromise = loadVideo(video.current);
-      const modelPromise = cocoSsd.load();
+  const cacheHttpCameraCredentials = (
+    url,
+    username,
+    password,
+    sender = "default"
+  ) => {
+    // Cache http user/pass for cameras
+    jQuery.ajax({
+      type: "GET",
+      url: url,
+      username: username,
+      password: password,
+      success: function (data) {
+        //Success block
+        console.log("Cached webserver camera credentials: " + sender);
+      },
+      error: function (xhr, ajaxOptions, throwError) {
+        //Error block
+        console.log("Error caching camera credentials: " + sender);
+      },
+    });
+  };
 
-      const model = await Promise.all([modelPromise, webCamPromise]);
+  const image = useRef(null);
+
+  const launchCamera = async () => {
+    // debugger;
+    const currentIPCam = localStorage.getItem("ipAddress");
+    const userName = localStorage.getItem("ipUsername");
+    const password = localStorage.getItem("ipPassword");
+
+    // const webCamPromise = loadVideo(video.current);
+    const modelPromise = cocoSsd.load();
+
+    const model = await Promise.all([modelPromise]);
+
+    if (isIPCamera) {
+      cacheHttpCameraCredentials(currentIPCam, userName, password);
+      image.current = new Image();
+      image.current.onload = function () {};
+      image.current.src = currentIPCam;
       setIsReady(true);
-      setModel(model[0]);
 
-      // start detect frame
-      startDetect(model[0]);
+      startCanvas();
+      updateCanvas(model[0]);
+    }
+  };
+
+  function startCanvas() {
+    requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
+      updateCanvas
+    );
+  }
+
+  //use with ip camera
+  const updateCanvas = async (model) => {
+    // debugger;
+    const canvas = document.getElementById("myCanvas");
+
+    // let aspect = video.videoHeight / video.videoWidth;
+    const width = 800;
+    let height = 600;
+    // if (!isIPCamera) height = Math.round(width * aspect);
+    canvas.width = width;
+    canvas.height = height;
+
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (isIPCamera) {
+      try {
+        // image = new Image();
+        // image.onload = function() { console.log('Image loaded') }
+        image.current.src = localStorage.getItem("ipAddress");
+        ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
+        image.current.width = width;
+        image.current.height = height;
+        if (model) {
+          model.detect(image.current).then((predictions) => {
+            renderPredictions(predictions, currentChoice);
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    // requestAnimationFrame(updateCanvas);
+  };
+
+  const getModel = async () => {
+    console.log({ isIPCamera });
+    try {
+      if (!isIPCamera) {
+        const webCamPromise = loadVideo(video.current);
+        const modelPromise = cocoSsd.load();
+
+        const allPromiseResponse = await Promise.all([
+          modelPromise,
+          webCamPromise,
+        ]);
+        setIsReady(true);
+        setModel(allPromiseResponse[0]);
+
+        // start detect frame
+        startDetect(allPromiseResponse[0]);
+      } else {
+        launchCamera();
+      }
     } catch (err) {
       alert("Video not loaded. Refresh the page");
     }
   };
+
+  const currentStream = useRef(null);
 
   const loadVideo = (video) => {
     if (!camera.current) return;
@@ -239,6 +347,7 @@ const DefaultCamera = (props) => {
       })
       .then((stream) => {
         video.srcObject = stream;
+        currentStream.current = stream;
 
         return new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
@@ -256,6 +365,15 @@ const DefaultCamera = (props) => {
     return webCamPromise;
   };
 
+  const vidOff = () => {
+    stopDetect();
+    currentStream.current?.getTracks()[0].stop();
+    console.log(requestAnimationFrameIpCameraRef.current);
+    window.cancelAnimationFrame(requestAnimationFrameIpCameraRef.current);
+    requestAnimationFrameIpCameraRef.current = null;
+    // console.log("Vid off");
+  };
+
   const readTextFile = (file) => {
     let rawFile = new XMLHttpRequest();
     let result = "";
@@ -263,11 +381,6 @@ const DefaultCamera = (props) => {
     rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4) {
         if (rawFile.status === 200 || rawFile.status == 0) {
-          // sentenceList.push(rawFile.responseText);
-          //
-          // console.log(rawFile.responseText);
-          // getList();
-          // setSentence([...sentence, rawFile.responseText]);
           result = rawFile.responseText;
         }
       }
@@ -600,6 +713,7 @@ const DefaultCamera = (props) => {
             />
             <canvas id="canvas" width={screenwidth} height={screenheight} />
             <canvas id="canvas1" width={screenwidth} height={screenheight} />
+            <canvas id="myCanvas" />
             <div className="output">
               <img id="photo" />
             </div>
@@ -764,6 +878,17 @@ const DefaultCamera = (props) => {
           </div>
         )}
         {isReady && <Footer takePhoto={takePhoto} />}
+        {isReady && (
+          <div
+            className="btn-setting"
+            onClick={() => {
+              vidOff();
+              history.push(routes.setting);
+            }}
+          >
+            <img src={SettingIcon} alt="" />
+          </div>
+        )}
       </Container>
     </React.Fragment>
   );

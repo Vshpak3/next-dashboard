@@ -5,5 +5,6 @@ export const routes = {
   confirmCode: "/confirm-code",
   signUp: "/sign-up",
   userProfile: "/user-profile",
+  setting: "/setting",
   main: "/",
 };
