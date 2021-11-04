@@ -198,7 +198,7 @@ const DefaultCamera = (props) => {
 
   const init = async () => {
     await getDeviceList();
-    getSentenceData();
+    await getSentenceData();
     getModel();
   };
 
@@ -254,56 +254,69 @@ const DefaultCamera = (props) => {
 
     if (isIPCamera) {
       cacheHttpCameraCredentials(currentIPCam, userName, password);
-      image.current = new Image();
-      image.current.onload = function () {};
-      image.current.src = currentIPCam;
+      // image.current = new Image();
+      // image.current.onload = function () {};
+      // image.current.src = currentIPCam;
+      // image.current.width = screenwidth;
+      // image.current.height = screenheight;
       setIsReady(true);
 
-      startCanvas();
+      // startCanvas();
       updateCanvas(model[0]);
+      const imageTest = document.getElementById("imgTest");
+      requestAnimationFrameRef.current = setInterval(() => {
+        detectFrame(imageTest, model[0]);
+      }, 3000);
     }
   };
 
-  function startCanvas() {
-    requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
-      updateCanvas
-    );
-  }
+  // function startCanvas() {
+  //   requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
+  //     updateCanvas
+  //   );
+  // }
 
   //use with ip camera
   const updateCanvas = async (model) => {
     // debugger;
-    const canvas = document.getElementById("myCanvas");
+    // const canvas = document.getElementById("myCanvas");
+    image.current = document.getElementById("imgTest");
 
     // let aspect = video.videoHeight / video.videoWidth;
-    const width = 800;
-    let height = 600;
-    // if (!isIPCamera) height = Math.round(width * aspect);
-    canvas.width = width;
-    canvas.height = height;
-
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // const width = 800;
+    // let height = 600;
+    // // if (!isIPCamera) height = Math.round(width * aspect);
+    // canvas.width = width;
+    // canvas.height = height;
+    //
+    // if (!canvas) return;
+    // const ctx = canvas.getContext("2d");
+    //
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (isIPCamera) {
       try {
-        // image = new Image();
-        // image.onload = function() { console.log('Image loaded') }
-        image.current.src = localStorage.getItem("ipAddress");
-        ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
-        image.current.width = width;
-        image.current.height = height;
-        if (model) {
-          model.detect(image.current).then((predictions) => {
-            renderPredictions(predictions, currentChoice);
-          });
-        }
+        // image.current = new Image();
+        // image.current.crossOrigin = "anonymous";
+        // image.current.onload = function () {
+        //   console.log("Image loaded");
+        // };
+        // image.current.src = localStorage.getItem("ipAddress");
+        // ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
+        image.current.width = screenwidth;
+        image.current.height = screenheight;
+        image.current.src = `${localStorage.getItem("ipAddress")}`;
+        // if (model) {
+        //   model.detect(image.current).then((predictions) => {
+        //     renderPredictions(predictions, currentChoice);
+        //   });
+        // }
       } catch (e) {
         console.log(e);
       }
     }
-    // requestAnimationFrame(updateCanvas);
+    requestAnimationFrameIpCameraRef.current = requestAnimationFrame(() =>
+      updateCanvas(model)
+    );
   };
 
   const getModel = async () => {
@@ -391,6 +404,7 @@ const DefaultCamera = (props) => {
 
   const getFileList = async () => {
     // let fileList = [];
+    // debugger;
     let data = Storage.list("sen_v2") // for listing ALL files without prefix, pass '' instead
       .then((result) => {
         return result;
@@ -401,25 +415,30 @@ const DefaultCamera = (props) => {
 
   const getSentenceData = async () => {
     let fileList = await getFileList();
+    // debugger;
     let list = [];
-    fileList.map((r) => {
-      list.push(r.key);
-    });
-    let listText = [];
+    if (!!fileList) {
+      fileList.map((r) => {
+        list.push(r.key);
+      });
+      let listText = [];
 
-    for (let i = 0; i < list.length; i++) {
-      await Storage.get(`${list[i]}`, { level: "public" })
-        .then((result) => {
-          listText = JSON.parse(readTextFile(result));
-        })
-        .catch((err) => console.log(err));
+      for (let i = 0; i < list.length; i++) {
+        await Storage.get(`${list[i]}`, { level: "public" })
+          .then((result) => {
+            listText = JSON.parse(readTextFile(result));
+          })
+          .catch((err) => console.log(err));
+      }
+
+      setSentence(listText);
     }
-
-    setSentence(listText);
   };
 
   const detectFrame = (video, model) => {
+    console.log({ video, model });
     model.detect(video).then((predictions) => {
+      console.log({ predictions });
       setData(
         predictions.sort((item1, item2) =>
           item1.class.localeCompare(item2.class)
@@ -498,6 +517,7 @@ const DefaultCamera = (props) => {
   }, [sentenceOfCurrent]);
 
   const renderPredictions = (predictions, currentChoice) => {
+    console.log({ predictions, currentChoice });
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
@@ -713,6 +733,13 @@ const DefaultCamera = (props) => {
             />
             <canvas id="canvas" width={screenwidth} height={screenheight} />
             <canvas id="canvas1" width={screenwidth} height={screenheight} />
+            <img
+              className="w-100 position-fixed"
+              id="imgTest"
+              crossOrigin="anonymous"
+              src={localStorage.getItem("ipAddress")}
+              alt=""
+            />
             <canvas id="myCanvas" />
             <div className="output">
               <img id="photo" />

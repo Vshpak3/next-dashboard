@@ -15,13 +15,6 @@ type IP_CAMERA_INFO_TYPE = {
   cameraType: string;
 };
 
-const initIpCameraInfo = {
-  ipAddress: localStorage.getItem("ipAddress") ?? "",
-  ipUsername: localStorage.getItem("ipUsername") ?? "",
-  ipPassword: localStorage.getItem("ipPassword") ?? "",
-  cameraType: localStorage.getItem("cameraType") ?? "",
-};
-
 const defaultCamera: OPTION_TYPE = {
   value: "0",
   text: "Select camera",
@@ -29,6 +22,12 @@ const defaultCamera: OPTION_TYPE = {
 
 const useSetting = () => {
   const history = useHistory();
+  const initIpCameraInfo = {
+    ipAddress: localStorage.getItem("ipAddress") ?? "",
+    ipUsername: localStorage.getItem("ipUsername") ?? "",
+    ipPassword: localStorage.getItem("ipPassword") ?? "",
+    cameraType: localStorage.getItem("cameraType") ?? "",
+  };
 
   const [options, setOptions] = useState<OPTION_TYPE[]>([]);
   const [currentCamera, setCurrentCamera] = useState<string>(
@@ -38,7 +37,7 @@ const useSetting = () => {
     initIpCameraInfo
   );
 
-  console.log(currentCamera);
+  console.log({ ipCameraInfo });
 
   const GetDeviceList = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
