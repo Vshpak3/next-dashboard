@@ -174,6 +174,7 @@ const DefaultCamera = (props) => {
   const camHeightRef = useRef(null);
   const requestAnimationFrameRef = useRef(null);
   const requestAnimationFrameIpCameraRef = useRef(null);
+  const imageLoaded = useRef(false);
 
   const video = useRef(null);
   const camera = useRef(null);
@@ -251,6 +252,7 @@ const DefaultCamera = (props) => {
     const modelPromise = cocoSsd.load();
 
     const model = await Promise.all([modelPromise]);
+    setModel(model[0]);
 
     if (isIPCamera) {
       cacheHttpCameraCredentials(currentIPCam, userName, password);
@@ -263,9 +265,13 @@ const DefaultCamera = (props) => {
 
       // startCanvas();
       updateCanvas(model[0]);
-      const imageTest = document.getElementById("imgTest");
+      // const imageTest = document.getElementById("imgTest");
+      image.current.crossOrigin = "Anonymous";
+
       requestAnimationFrameRef.current = setInterval(() => {
-        detectFrame(imageTest, model[0]);
+        // console.log({ image: image.current });
+        console.log({ loaded: imageLoaded.current });
+        imageLoaded.current && detectFrame(image.current, model[0]);
       }, 3000);
     }
   };
@@ -280,7 +286,7 @@ const DefaultCamera = (props) => {
   const updateCanvas = async (model) => {
     // debugger;
     // const canvas = document.getElementById("myCanvas");
-    image.current = document.getElementById("imgTest");
+    // image.current = document.getElementById("imgTest");
 
     // let aspect = video.videoHeight / video.videoWidth;
     // const width = 800;
@@ -304,6 +310,9 @@ const DefaultCamera = (props) => {
         // ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
         image.current.width = screenwidth;
         image.current.height = screenheight;
+        // image.current.crossOrigin = "";
+        camWidthRef.current = screenwidth;
+        camHeightRef.current = screenheight;
         image.current.src = `${localStorage.getItem("ipAddress")}`;
         // if (model) {
         //   model.detect(image.current).then((predictions) => {
@@ -453,7 +462,11 @@ const DefaultCamera = (props) => {
 
   const startDetect = (initModel) => {
     requestAnimationFrameRef.current = setInterval(() => {
-      detectFrame(video.current, initModel);
+      if (isIPCamera) {
+        detectFrame(image.current, initModel);
+      } else {
+        detectFrame(video.current, initModel);
+      }
     }, 3000);
   };
 
@@ -676,55 +689,89 @@ const DefaultCamera = (props) => {
     let video = document.getElementById("video");
     let canvas1 = document.getElementById("canvas1");
     let photo = document.getElementById("photo");
+    let photoIpCamera = document.getElementById("imgTest");
     let width = 1366;
     let height = 768;
     let streaming = false;
-    loadVideo(video).then(() => {
-      video.addEventListener(
-        "canplay",
-        function (ev) {
-          if (!streaming) {
-            height = video.videoHeight / (video.videoWidth / width);
 
-            if (isNaN(height)) {
-              height = width / (4 / 3);
+    if (isIPCamera) {
+      canvas1.setAttribute("width", width);
+      canvas1.setAttribute("height", height);
+
+      let context = canvas1.getContext("2d");
+      canvas1.width = width;
+      canvas1.height = height;
+      photoIpCamera.src = localStorage.getItem("ipAddress");
+      context.drawImage(photoIpCamera, 0, 0, width, height);
+
+      console.log({ canvas1 });
+      let data = canvas1
+        .toDataURL("image/png")
+        .replace("image/png", "image/octet-stream");
+      console.log({ data });
+
+      photo.setAttribute("name", Date.now());
+      photo.setAttribute("src", data);
+      let link = document.createElement("a");
+      link.href = photo.src;
+      link.download = `${photo.name}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // window.location.reload();
+      photo.removeAttribute("name");
+      photo.removeAttribute("src");
+      canvas1.removeAttribute("width");
+      canvas1.removeAttribute("height");
+    } else {
+      loadVideo(video).then(() => {
+        video.addEventListener(
+          "canplay",
+          function (ev) {
+            if (!streaming) {
+              height = video.videoHeight / (video.videoWidth / width);
+
+              if (isNaN(height)) {
+                height = width / (4 / 3);
+              }
+
+              // video.setAttribute("width", screenwidth);
+              // video.setAttribute("height", screenheight);
+              canvas1.setAttribute("width", width);
+              canvas1.setAttribute("height", height);
+              streaming = true;
+              let context = canvas1.getContext("2d");
+              canvas1.width = width;
+              canvas1.height = height;
+              context.drawImage(video, 0, 0, width, height);
+              let data = canvas1.toDataURL("image/png");
+              console.log({ data });
+              photo.setAttribute("name", Date.now());
+              photo.setAttribute("src", data);
+              let link = document.createElement("a");
+              link.href = photo.src;
+              link.download = `${photo.name}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              // window.location.reload();
+              photo.removeAttribute("name");
+              photo.removeAttribute("src");
+              canvas1.removeAttribute("width");
+              canvas1.removeAttribute("height");
             }
-
-            // video.setAttribute("width", screenwidth);
-            // video.setAttribute("height", screenheight);
-            canvas1.setAttribute("width", width);
-            canvas1.setAttribute("height", height);
-            streaming = true;
-            let context = canvas1.getContext("2d");
-            canvas1.width = width;
-            canvas1.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            let data = canvas1.toDataURL("image/png");
-            photo.setAttribute("name", Date.now());
-            photo.setAttribute("src", data);
-            let link = document.createElement("a");
-            link.href = photo.src;
-            link.download = `${photo.name}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            // window.location.reload();
-            photo.removeAttribute("name");
-            photo.removeAttribute("src");
-            canvas1.removeAttribute("width");
-            canvas1.removeAttribute("height");
-          }
-        },
-        false
-      );
-    });
+          },
+          false
+        );
+      });
+    }
   };
 
   return (
     <React.Fragment>
       <Container fluid={true}>
         <Row>
-          <Col>
+          <Col className="p-0">
             <video
               id="video"
               width={screenwidth}
@@ -736,8 +783,20 @@ const DefaultCamera = (props) => {
             <img
               className="w-100 position-fixed"
               id="imgTest"
-              crossOrigin="anonymous"
-              src={localStorage.getItem("ipAddress")}
+              ref={(node) => {
+                if (!node) {
+                  return;
+                }
+                image.current = node;
+                const img = node;
+                const updateFunc = () => {
+                  imageLoaded.current = true;
+                };
+                img.onload = updateFunc;
+                if (img.complete) {
+                  updateFunc();
+                }
+              }}
               alt=""
             />
             <canvas id="myCanvas" />

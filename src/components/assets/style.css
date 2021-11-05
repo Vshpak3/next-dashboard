@@ -4,6 +4,7 @@
   left: 0;
   display: block;
   cursor: auto;
+  z-index: 1;
 }
 #canvas1 {
   position: fixed;
@@ -413,6 +414,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1;
 }
 .slow-left img, .slow-right img, .fast-right img, .fast-left img {
   height: 90px;
@@ -464,6 +466,7 @@
   padding: 20px 40px 20px 50px;
   border: 1px solid #ffffff;
   cursor: pointer;
+  z-index: 1;
 }
 .btn-setting img {
   width: 70%;
