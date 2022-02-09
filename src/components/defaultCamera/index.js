@@ -22,6 +22,8 @@ import KeyboardIcon from "../assets/ketboardIcon.png";
 import SettingIcon from "../assets/setting.png";
 import HomeIcon from "../assets/home.png";
 import PhotoIcon from "../assets/photos.png";
+import CameraControll from "../assets/camera.png";
+
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
@@ -149,6 +151,15 @@ const Focus = styled.div`
   img {
     width: 50%;
   }
+`;
+
+const ImageWrapper = styled.div``;
+
+
+const ImageNavigate = styled.img`
+  width: 80px;
+  height: auto;
+  object-fit: cover;
 `;
 
 const getWindowSize = () => {
@@ -965,6 +976,20 @@ const DefaultCamera = (props) => {
           </div>
         )}
         {isReady && <Footer takePhoto={takePhoto} />}
+        {/* {
+          isReady && (
+            <div className="btn-take-photo">
+              <ImageWrapper>
+                <ImageNavigate
+                  src={CameraControll}
+                  alt=""
+                  onClick={takePhoto}
+                  className="button_click_cursor"
+                />
+              </ImageWrapper>
+            </div>
+          )
+        } */}
         {isReady && (
           <div className="btn-home">
             <div
