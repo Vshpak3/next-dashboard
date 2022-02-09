@@ -455,7 +455,7 @@
   display: flex;
   justify-content: center;
 }
-.btn-setting {
+.btn-setting div {
   position: fixed;
   left: -5px;
   top: 50%;
@@ -471,5 +471,41 @@
   z-index: 1;
 }
 .btn-setting img {
+  width: 70%;
+}
+.btn-home div {
+  position: fixed;
+  left: -5px;
+  top: 30%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  background: #5757578c;
+  border-bottom-right-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 20px 40px 20px 50px;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  z-index: 1;
+}
+.btn-home img {
+  width: 70%;
+}
+.btn-images div {
+  position: fixed;
+  left: -5px;
+  top: 70%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  background: #5757578c;
+  border-bottom-right-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 20px 40px 20px 50px;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  z-index: 1;
+}
+.btn-images img {
   width: 70%;
 }

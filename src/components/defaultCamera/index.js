@@ -20,6 +20,8 @@ import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
 import SettingIcon from "../assets/setting.png";
+import HomeIcon from "../assets/home.png";
+import PhotoIcon from "../assets/photos.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
@@ -817,9 +819,8 @@ const DefaultCamera = (props) => {
                         .map((item, index) => (
                           <div
                             key={index}
-                            className={`text-bg my-2 button_click_cursor ${
-                              item === currentText ? "active" : ""
-                            }`}
+                            className={`text-bg my-2 button_click_cursor ${item === currentText ? "active" : ""
+                              }`}
                             onClick={() => choiceTextSpeak(item)}
                           >
                             {item}
@@ -853,9 +854,8 @@ const DefaultCamera = (props) => {
                   )}
                 </div>
                 <div
-                  className={`icon-circle cancel-mess ${
-                    isShowList ? "active" : ""
-                  }`}
+                  className={`icon-circle cancel-mess ${isShowList ? "active" : ""
+                    }`}
                   onClick={() => toggleShowList()}
                 >
                   <img src={CancelMess} alt="" />
@@ -878,7 +878,7 @@ const DefaultCamera = (props) => {
                     <ItemPredictions
                       className={
                         currentChoice != null &&
-                        item.bbox[0] === currentChoice.bbox[0]
+                          item.bbox[0] === currentChoice.bbox[0]
                           ? "active"
                           : ""
                       }
@@ -966,14 +966,36 @@ const DefaultCamera = (props) => {
         )}
         {isReady && <Footer takePhoto={takePhoto} />}
         {isReady && (
-          <div
-            className="btn-setting"
-            onClick={() => {
-              vidOff();
-              history.push(routes.setting);
-            }}
-          >
-            <img src={SettingIcon} alt="" />
+          <div className="btn-home">
+            <div
+
+              onClick={() => {
+                vidOff();
+                history.push(routes.home);
+              }}
+            >
+              <img src={HomeIcon} alt="" />
+            </div>
+          </div>
+        )}
+        {isReady && (
+          <div className="btn-setting">
+            <div
+
+              onClick={() => {
+                vidOff();
+                history.push(routes.setting);
+              }}
+            >
+              <img src={SettingIcon} alt="" />
+            </div>
+          </div>
+        )}
+        {isReady && (
+          <div className="btn-images">
+            <div>
+              <img src={PhotoIcon} alt="" />
+            </div>
           </div>
         )}
       </Container>

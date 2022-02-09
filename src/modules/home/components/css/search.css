@@ -1,0 +1,27 @@
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #232323;
+  padding: 0.5rem;
+  margin: 10%;
+  height: 6%;
+  border-radius: 0.5rem;
+  color: white;
+  /* box-shadow: 0.25rem 0.25rem 0rem #f0b2a8; */
+}
+
+input {
+  margin: 0 0.5rem 0 0.5rem;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: #232323;
+  color: white;
+  height: inherit;
+}
+
+/* ::placeholder {
+  color: #232323;
+} */
