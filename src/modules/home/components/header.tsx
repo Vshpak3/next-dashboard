@@ -14,7 +14,9 @@ import {
 } from "react-pro-sidebar";
 
 //import icons from react icons
-import { FiHome, FiLogOut, FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
+import { HiOutlinePhotograph } from "react-icons/hi";
+import { ImExit } from "react-icons/im";
 
 
 //import sidebar css from react-pro-sidebar module and our custom css 
@@ -22,12 +24,12 @@ import "react-pro-sidebar/dist/css/styles.css";
 import "../components/css/header.css";
 
 
-const Header:React.FC<any> = () => {
-  
-    //create initial menuCollapse state using useState hook
-    const [menuCollapse, setMenuCollapse] = useState(false)
+const Header: React.FC<any> = () => {
 
-    //create a custom function that will change menucollapse state from false to true and true to false
+  //create initial menuCollapse state using useState hook
+  const [menuCollapse, setMenuCollapse] = useState(false)
+
+  //create a custom function that will change menucollapse state from false to true and true to false
   const menuIconClick = () => {
     //condition checking to change state from true to false and vice versa
     menuCollapse ? setMenuCollapse(false) : setMenuCollapse(true);
@@ -36,32 +38,34 @@ const Header:React.FC<any> = () => {
   return (
     <>
       <div id="header">
-          {/* collapsed props to change menu size using menucollapse state */}
+        {/* collapsed props to change menu size using menucollapse state */}
         <ProSidebar collapsed={menuCollapse}>
           <SidebarHeader>
-          <div className="logotext">
+            <div className="logotext">
               {/* small and big change using menucollapse state */}
               <p>{menuCollapse ? "Logo" : "Big Logo"}</p>
             </div>
             {/* <div className="closemenu" onClick={menuIconClick}> */}
-                {/* changing menu collapse icon on click */}
-              {/* {menuCollapse ? (
+            {/* changing menu collapse icon on click */}
+            {/* {menuCollapse ? (
                 <FiArrowRightCircle/>
               ) : (
                 <FiArrowLeftCircle/>
               )} */}
             {/* </div> */}
           </SidebarHeader>
-         <SearchBar />
+          <SearchBar />
           <SidebarContent>
             <Menu iconShape="square">
-              <MenuItem active={true}>
+              <MenuItem icon={<ImExit size={50} />} active={true}>
                 Back to Camera
               </MenuItem>
-              <MenuItem >Category</MenuItem>
-              <MenuItem >Favourite</MenuItem>
-              <MenuItem >Author</MenuItem>
-              <MenuItem >Settings</MenuItem>
+              <MenuItem icon={<HiOutlinePhotograph size={50} />}>My Album</MenuItem>
+              {/* <Menu>
+                <MenuItem >Favourite</MenuItem>
+                <MenuItem >Author</MenuItem>
+                <MenuItem >Settings</MenuItem>
+              </Menu> */}
             </Menu>
           </SidebarContent>
           <SidebarFooter>
