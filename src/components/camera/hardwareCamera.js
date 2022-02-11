@@ -114,7 +114,7 @@ const HardwareCamera = () => {
       return;
     }
     //if (localStorage.getItem("cameraType") === "arduino - servo")
-      globalPort.write(speed);
+      // globalPort.write(speed);
   };
 
   //console.log({ globalPort });
@@ -123,26 +123,28 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("r");
     //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
 
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
 
-      globalPort.write("b");
-      globalPort.write("b");
-      globalPort.write("b");
+      // globalPort.write("b");
+      // globalPort.write("b");
+      // globalPort.write("b");
     // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
     //   globalPort.write("r");
     // else if (localStorage.getItem("cameraType") === "raspberrypi")
@@ -155,8 +157,8 @@ const HardwareCamera = () => {
     }
     // if (localStorage.getItem("cameraType") === "raspberrypi")
     //   client.write("fr");
-    // if (localStorage.getItem("cameraType") === "arduino - bldc")
-    //   globalPort.write("R");
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("R");
     globalPort.write("R");
     globalPort.write("R");
     globalPort.write("R");
@@ -166,26 +168,28 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("l");
     // if (localStorage.getItem("cameraType") === "arduino - servo") {
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
-      globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
+      // globalPort.write("x");
 
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
-      globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
+      // globalPort.write("r");
 
-      globalPort.write("b");
-      globalPort.write("b");
-      globalPort.write("b");
+      // globalPort.write("b");
+      // globalPort.write("b");
+      // globalPort.write("b");
     // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
     //   globalPort.write("l");
     // else if (localStorage.getItem("cameraType") === "raspberrypi")
@@ -198,8 +202,8 @@ const HardwareCamera = () => {
     }
     // if (localStorage.getItem("cameraType") === "raspberrypi")
     //   client.write("fl");
-    // if (localStorage.getItem("cameraType") === "arduino - bldc")
-    //   globalPort.write("L");
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("L");
 
     globalPort.write("L");
     globalPort.write("L");
@@ -210,14 +214,17 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
-    //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      globalPort.write("w");
-      globalPort.write("w");
-      globalPort.write("w");
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("u");
 
-      globalPort.write("e");
-      globalPort.write("e");
-      globalPort.write("e");
+    //if (localStorage.getItem("cameraType") === "arduino - servo") {
+      // globalPort.write("w");
+      // globalPort.write("w");
+      // globalPort.write("w");
+
+      // globalPort.write("e");
+      // globalPort.write("e");
+      // globalPort.write("e");
     // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
     //   globalPort.write("u");
     // else if (localStorage.getItem("cameraType") === "raspberrypi")
@@ -228,14 +235,17 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
+    if (localStorage.getItem("cameraType") === "arduino - bldc")
+      globalPort.write("d");
+      
     //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      globalPort.write("q");
-      globalPort.write("q");
-      globalPort.write("q");
+      // globalPort.write("q");
+      // globalPort.write("q");
+      // globalPort.write("q");
 
-      globalPort.write("e");
-      globalPort.write("e");
-      globalPort.write("e");
+      // globalPort.write("e");
+      // globalPort.write("e");
+      // globalPort.write("e");
     // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
     //   globalPort.write("d");
     // else if (localStorage.getItem("cameraType") === "raspberrypi")
