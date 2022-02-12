@@ -8,6 +8,8 @@ import { RightArrowIcon } from "../../../common/right-arrow-icon";
 import { Loader } from "../../../common/loader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as Router from "react-router";
+import { routes } from "../../app/contants";
 const Container = styled("div")`
   width: 100vw;
   height: 100vh;
@@ -17,13 +19,11 @@ const Container = styled("div")`
 const ContentWrapper = styled("div")`
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, white 50%, #e60000 50%)
-`
+  background: linear-gradient(to bottom, white 50%, #e60000 50%);
+`;
 
 const Content = styled("div")`
-  margin-top: 90px;
   width: 2960px;
-  height: 2197px;
   transform: scale(0.4) translate(-50%, -50%);
   transform-origin: left top;
   position: absolute;
@@ -34,7 +34,6 @@ const Content = styled("div")`
 `;
 
 const LogoIconWrapper = styled("div")`
-  margin-top: 192px;
   text-align: center;
 `;
 
@@ -58,7 +57,7 @@ const UsernameWrapper = styled("div")`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 270px;
+  margin-top: 170px;
 `;
 
 const PasswordWrapper = styled("div")`
@@ -73,6 +72,10 @@ const SwitcherWrapper = styled("div")`
   justify-content: center;
   align-items: center;
   margin-top: 72px;
+  .reset-pass {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 const Label = styled("div")`
@@ -125,6 +128,9 @@ export const Login: React.FC<LoginProps> = ({
   isFetching,
   error,
 }) => {
+  const history = Router.useHistory();
+  const handleResetPasswordClick = () => history.push(routes.resetPassword);
+
   const handleUsernameChange: ChangeEventHandler<HTMLInputElement> = (e) =>
     onUsernameChange(e.target.value);
   const handlePasswordChange: ChangeEventHandler<HTMLInputElement> = (e) =>
@@ -166,41 +172,47 @@ export const Login: React.FC<LoginProps> = ({
   return (
     <Container>
       <ContentWrapper>
-      <Content>
-        <LogoIconWrapper>
-          <LogoIcon />
-        </LogoIconWrapper>
-        <Title>Log In</Title>
-        <BottomBlock>
-          <UsernameWrapper>
-            <Input
-              value={username}
-              onChange={handleUsernameChange}
-              placeholder="Email"
-            />
-          </UsernameWrapper>
-          <PasswordWrapper>
-            <Input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              placeholder="Password"
-            />
-          </PasswordWrapper>
-          <SwitcherWrapper>
-            <Label>Remember me on this device</Label>
-            <Switcher value={checked} onChange={onCheckedChange} />
-          </SwitcherWrapper>
-          <ArrowsWrapper>
-            <ArrowWrapper onClick={onLeftClick}>
-              <LeftArrowIcon />
-            </ArrowWrapper>
-            <ArrowWrapper onClick={onRightClick}>
-              <RightArrowIcon />
-            </ArrowWrapper>
-          </ArrowsWrapper>
-        </BottomBlock>
-      </Content>
+        <Content>
+          <LogoIconWrapper>
+            <LogoIcon />
+          </LogoIconWrapper>
+          <Title>Log In</Title>
+          <BottomBlock>
+            <UsernameWrapper>
+              <Input
+                value={username}
+                onChange={handleUsernameChange}
+                placeholder="Email"
+              />
+            </UsernameWrapper>
+            <PasswordWrapper>
+              <Input
+                type="password"
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder="Password"
+              />
+            </PasswordWrapper>
+            {/*<p onClick={handleResetPasswordClick}>Reset password</p>*/}
+            <SwitcherWrapper>
+              <Label className="reset-pass" onClick={handleResetPasswordClick}>
+                Forgot password
+              </Label>
+            </SwitcherWrapper>
+            <SwitcherWrapper>
+              <Label>Remember me on this device</Label>
+              <Switcher value={checked} onChange={onCheckedChange} />
+            </SwitcherWrapper>
+            <ArrowsWrapper>
+              <ArrowWrapper onClick={onLeftClick}>
+                <LeftArrowIcon />
+              </ArrowWrapper>
+              <ArrowWrapper onClick={onRightClick}>
+                <RightArrowIcon />
+              </ArrowWrapper>
+            </ArrowsWrapper>
+          </BottomBlock>
+        </Content>
       </ContentWrapper>
       {isFetching && <Loader />}
       <ToastContainer />

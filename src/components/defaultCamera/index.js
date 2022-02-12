@@ -1,25 +1,34 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Container, Row, Col } from "reactstrap";
-import AWS, { IoTSecureTunneling } from "aws-sdk";
-import Amplify, { Auth, Storage } from "aws-amplify";
+import Amplify, { Storage } from "aws-amplify";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import "../assets/style.css";
-import jsonData from "./data.json";
-import suggestionsJson from "./suggestions.json";
-import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-import Predictionary from "predictionary";
-import Footer from "./footer";
-import PollySpeaking from "./pollySpeaking";
-import { TurnedIn } from "@material-ui/icons";
-import Button from "@material-ui/core/Button";
-import {withRouter, useHistory} from 'react-router-dom';
+import jQuery from "jquery";
+import { withRouter, useHistory, Link } from "react-router-dom";
+import Keyboard from "react-simple-keyboard";
+import LockImg from "../assets/lock.png";
+import Back from "../assets/back.png";
+import Next from "../assets/next.png";
+import Top from "../assets/top.png";
+import Bottom from "../assets/bottom.png";
+import FastLeft from "../assets/fast-left.png";
+import FastRight from "../assets/fast-right.png";
+import Spinner from "../assets/Spinner.gif";
+import TalkIcon from "../assets/talkIcon.png";
+import CancelMess from "../assets/cancelMessIcon.png";
+import KeyboardIcon from "../assets/ketboardIcon.png";
+import SettingIcon from "../assets/setting.png";
 
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
+import AWS from "aws-sdk";
+import useControlCamera from "../camera/useControlCamera";
+import Footer from "./footer";
+import { routes } from "../../modules/app/contants";
 
-const remote = window.require('electron').remote;
+const remote = window.require("electron").remote;
 
 Amplify.configure({
   Auth: {
@@ -29,291 +38,514 @@ Amplify.configure({
     userPoolWebClientId: awsconfig.aws_user_pools_web_client_id, //OPTIONAL - Amazon Cognito Web Client ID
   },
   Storage: {
-    
-      bucket: awsconfig.aws_user_files_s3_bucket, //REQUIRED -  Amazon S3 bucket name
-      region: awsconfig.aws_cognito_region, //OPTIONAL -  Amazon service region
-      identityPoolId: awsconfig.aws_cognito_identity_pool_id,
-    },
+    bucket: awsconfig.aws_user_files_s3_bucket, //REQUIRED -  Amazon S3 bucket name
+    region: awsconfig.aws_cognito_region, //OPTIONAL -  Amazon service region
+    identityPoolId: awsconfig.aws_cognito_identity_pool_id,
+  },
 });
 
-const WrapperInput = styled.div`
-  width: 514px;
-  height: 200px;
-  /* background: #ddd; */
-  position: absolute;
-  top: 15px;
+const initialData = [
+  { class: "Person" },
+  { class: "Cell phone" },
+  { class: "TV" },
+  { class: "Laptop" },
+  { class: "Pen" },
+  { class: "Cup" },
+  { class: "Bottle" },
+  { class: "Window" },
+];
+
+const initSpeak = {
+  OutputFormat: "mp3",
+  SampleRate: "16000",
+  Text: "",
+  TextType: "text",
+  VoiceId: "Matthew",
+};
+
+const Predictions = styled.div`
+  position: fixed;
+  bottom: 12%;
+  display: flex;
+  z-index: 100;
   left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 999;
-  .inputData {
-    width: 100%;
+  transform: translateX(-50%);
+  width: 100%;
+  flex-direction: column;
+  & > div > div {
+    margin: 0 20px;
   }
+  z-index: 2;
+`;
 
-  @media only screen and (max-width: 768px) {
-    width: 150px;
+const Action = styled.div`
+  position: fixed;
+`;
+
+const ItemPredictions = styled.div`
+  background: #5757578c;
+  mix-blend-mode: hard-light;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+  border-radius: 30px;
+  display: inline-flex;
+  width: 210px;
+  height: 90px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 30px;
+  cursor: pointer;
+  span {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 600;
   }
-
-  @media only screen and (max-width: 500px) {
-    width: 100px;
+  &:first-child {
+    margin-left: 0;
+  }
+  &:last-child {
+    margin-right: 0;
+  }
+  &.active {
+    background: red;
   }
 `;
 
-// const optionsKeyBoard = ["normal keyboard", "dasher keyboard"];
-const optionsKeyBoard = ["normal keyboard"];
+const Logo = styled.div`
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  img {
+    width: 50%;
+  }
+`;
+
+const Navigate = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  cursor: pointer;
+  img {
+    width: 40px;
+  }
+`;
+
+const ListPredictions = styled.div`
+  display: block;
+  flex: 8;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+`;
+
+const Focus = styled.div`
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  img {
+    width: 50%;
+  }
+`;
 
 const getWindowSize = () => {
-  return remote.getCurrentWindow().getBounds()
-}
+  return remote.getCurrentWindow().getBounds();
+};
 
 const DefaultCamera = (props) => {
   const [data, setData] = useState([]);
-  const [detectedObject, setDetectedObject] = useState();
-  const [senetnce, setSentence] = useState();
-  const [confirmSpeak, setConfirmSpeak] = useState(false);
-  const [keyboardFalg, setKeyboardFlag] = useState(false);
-  // const [keyboardFalg, sremoveKeyboardFlag] = useState(false);
-  const [selectedOption, setSelectopOption] = useState(optionsKeyBoard[0]);
-  const [fkeyboard, setFkeyboard] = useState(false);
-  // console.log(`selectedOption>>>`,selectedOption)
-  const [input, setInput] = useState();
-  const [layout, setLayout] = useState("default");
-  const [starter, setStarter] = useState(false);
-  const keyboard = useRef();
-  const [suggestions, setSuggestions] = useState();
-  const [parent, setParent] = useState(false);
-  const [text, setText] = useState({
-    OutputFormat: "mp3",
-    SampleRate: "16000",
-    Text: "",
-    TextType: "text",
-    VoiceId: "Matthew",
-  });
-  
-  var presentences;
-  let sentenceList = [];
-  let history = useHistory();
+  const [sentence, setSentence] = useState([]);
+  const [model, setModel] = useState(null);
+  const [currentChoice, setCurrentChoice] = useState(null);
+  const [currentText, setCurrentText] = useState("");
+  const [isReady, setIsReady] = useState(false);
+  const [isSpeak, setIsSpeak] = useState(false);
+  const [isWaitingSpeak, setIsWaitingSpeak] = useState(false);
+  const [isShowList, setIsShowList] = useState(false);
+  const [isOpenKeyboard, setIsOpenKeyboard] = useState(false);
+  const [isOpenControl, setIsOpenControl] = useState(false);
+  const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
+  const [inputKeyboard, setInputKeyboard] = useState("");
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
-  let camWidth, camHeight;
 
-  const customLayout = {
-    'default': [
-      'a b c d e f',
-      'g h i j k l',
-      'm n o p q r',
-      's t u v w x',
-      'y z 1 2 3 4',
-      '5 6 7 8 9 0',
-      '{shift} .com {enter}',
-      '&!? {space} {bksp}'
-    ],
-    'shift': [
-      'A B C D E F',
-      'G H I J K L',
-      'M N O P Q R',
-      'S T U V W X',
-      'Y Z 1 2 3 4',
-      '5 6 7 8 9 0',
-      '&!? {space} {bksp}'
-    ]
-  }
-  let video;
-  let canvas1;
-  let photo;
-  let width;
-  let height;
-  let streaming;
+  const camWidthRef = useRef(null);
+  const camHeightRef = useRef(null);
+  const requestAnimationFrameRef = useRef(null);
+  const requestAnimationFrameIpCameraRef = useRef(null);
+  const imageLoaded = useRef(false);
+
+  const video = useRef(null);
+  const camera = useRef(null);
+  const history = useHistory();
+  const isIPCamera =
+    !!localStorage.getItem("ipAddress") &&
+    localStorage.getItem("ipAddress") !== "";
+
+  const {
+    mouseOverTop,
+    mouseOverSlowRight,
+    mouseOverSlowLeft,
+    mouseOverFastRight,
+    mouseOverFastLeft,
+    mouseOverBottom,
+    stop,
+  } = useControlCamera();
 
   useEffect(() => {
-    video = document.getElementById("video"); 
-    getSentenceData();
-    
-    const webCamPromise = loadVideo(video);      
-
-    const modelPromise = cocoSsd.load();
-    Promise.all([modelPromise, webCamPromise])
-      .then((values) => {
-        detectFrame(video, values[0]);
-      })
-      .catch(() => {
-        alert("Video not loaded. Refresh the page");
-      });
+    init();
   }, []);
 
+  const init = async () => {
+    await getDeviceList();
+    await getSentenceData();
+    getModel();
+  };
+
+  const getDeviceList = async () => {
+    let list = [];
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+
+      for (let i = 0; i < devices.length; i += 1) {
+        if (devices[i].kind === "videoinput") {
+          list.push(devices[i].deviceId);
+        }
+      }
+    }
+    camera.current = list.length == 0 ? null : list[0];
+  };
+
+  const cacheHttpCameraCredentials = (
+    url,
+    username,
+    password,
+    sender = "default"
+  ) => {
+    // Cache http user/pass for cameras
+    jQuery.ajax({
+      type: "GET",
+      url: url,
+      username: username,
+      password: password,
+      success: function (data) {
+        //Success block
+        console.log("Cached webserver camera credentials: " + sender);
+      },
+      error: function (xhr, ajaxOptions, throwError) {
+        //Error block
+        console.log("Error caching camera credentials: " + sender);
+      },
+    });
+  };
+
+  const image = useRef(null);
+
+  const launchCamera = async () => {
+    // debugger;
+    const currentIPCam = localStorage.getItem("ipAddress");
+    const userName = localStorage.getItem("ipUsername");
+    const password = localStorage.getItem("ipPassword");
+
+    // const webCamPromise = loadVideo(video.current);
+    const modelPromise = cocoSsd.load();
+
+    const model = await Promise.all([modelPromise]);
+    setModel(model[0]);
+
+    if (isIPCamera) {
+      cacheHttpCameraCredentials(currentIPCam, userName, password);
+      // image.current = new Image();
+      // image.current.onload = function () {};
+      // image.current.src = currentIPCam;
+      // image.current.width = screenwidth;
+      // image.current.height = screenheight;
+      setIsReady(true);
+
+      // startCanvas();
+      updateCanvas(model[0]);
+      // const imageTest = document.getElementById("imgTest");
+      image.current.crossOrigin = "Anonymous";
+
+      requestAnimationFrameRef.current = setInterval(() => {
+        // console.log({ image: image.current });
+        console.log({ loaded: imageLoaded.current });
+        imageLoaded.current && detectFrame(image.current, model[0]);
+      }, 3000);
+    }
+  };
+
+  // function startCanvas() {
+  //   requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
+  //     updateCanvas
+  //   );
+  // }
+
+  //use with ip camera
+  const updateCanvas = async (model) => {
+    // debugger;
+    // const canvas = document.getElementById("myCanvas");
+    // image.current = document.getElementById("imgTest");
+
+    // let aspect = video.videoHeight / video.videoWidth;
+    // const width = 800;
+    // let height = 600;
+    // // if (!isIPCamera) height = Math.round(width * aspect);
+    // canvas.width = width;
+    // canvas.height = height;
+    //
+    // if (!canvas) return;
+    // const ctx = canvas.getContext("2d");
+    //
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (isIPCamera) {
+      try {
+        // image.current = new Image();
+        // image.current.crossOrigin = "anonymous";
+        // image.current.onload = function () {
+        //   console.log("Image loaded");
+        // };
+        // image.current.src = localStorage.getItem("ipAddress");
+        // ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
+        image.current.width = screenwidth;
+        image.current.height = screenheight;
+        // image.current.crossOrigin = "";
+        camWidthRef.current = screenwidth;
+        camHeightRef.current = screenheight;
+        image.current.src = `${localStorage.getItem("ipAddress")}`;
+        // if (model) {
+        //   model.detect(image.current).then((predictions) => {
+        //     renderPredictions(predictions, currentChoice);
+        //   });
+        // }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    requestAnimationFrameIpCameraRef.current = requestAnimationFrame(() =>
+      updateCanvas(model)
+    );
+  };
+
+  const getModel = async () => {
+    console.log({ isIPCamera });
+    try {
+      if (!isIPCamera) {
+        const webCamPromise = loadVideo(video.current);
+        const modelPromise = cocoSsd.load();
+
+        const allPromiseResponse = await Promise.all([
+          modelPromise,
+          webCamPromise,
+        ]);
+        setIsReady(true);
+        setModel(allPromiseResponse[0]);
+
+        // start detect frame
+        startDetect(allPromiseResponse[0]);
+      } else {
+        launchCamera();
+      }
+    } catch (err) {
+      alert("Video not loaded. Refresh the page");
+    }
+  };
+
+  const currentStream = useRef(null);
+
   const loadVideo = (video) => {
+    if (!camera.current) return;
     const webCamPromise = navigator.mediaDevices
       .getUserMedia({
         audio: false,
         video: {
-          facingMode: "user",
           width: screenwidth,
           height: screenheight,
+          deviceId: {
+            exact: camera.current,
+          },
         },
       })
       .then((stream) => {
         video.srcObject = stream;
+        currentStream.current = stream;
 
         return new Promise((resolve, reject) => {
           video.onloadedmetadata = () => {
-            camWidth = video.videoWidth;
-            camHeight = video.videoHeight;
+            camWidthRef.current = video.videoWidth;
+            camHeightRef.current = video.videoHeight;
             video.play();
             resolve();
           };
         });
       })
-      .catch(() => {
-        alert("No camera Detected. Enable camera and refresh the page");
+      .catch((err) => {
+        // alert("No camera Detected. Enable camera and refresh the page");
+        alert(err);
       });
-      return webCamPromise;
-  }
+    return webCamPromise;
+  };
 
-  const changeKeyBoardStatus = () => {
-    setFkeyboard(!fkeyboard);
-    setKeyboardFlag(!keyboardFalg);
-    setStarter(false);
-  }
+  const vidOff = () => {
+    stopDetect();
+    currentStream.current?.getTracks()[0].stop();
+    console.log(requestAnimationFrameIpCameraRef.current);
+    window.cancelAnimationFrame(requestAnimationFrameIpCameraRef.current);
+    requestAnimationFrameIpCameraRef.current = null;
+    // console.log("Vid off");
+  };
 
   const readTextFile = (file) => {
-      var rawFile = new XMLHttpRequest();
-      rawFile.open("GET", file, false);
-      rawFile.onreadystatechange = function ()
-      {
-          if(rawFile.readyState === 4)
-          {
-              if(rawFile.status === 200 || rawFile.status == 0)
-              {
-                sentenceList.push(rawFile.responseText);
-                getList();
-              }
-          }
+    let rawFile = new XMLHttpRequest();
+    let result = "";
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function () {
+      if (rawFile.readyState === 4) {
+        if (rawFile.status === 200 || rawFile.status == 0) {
+          result = rawFile.responseText;
+        }
       }
-      rawFile.send(null);
-  }
+    };
+    rawFile.send(null);
+    return result;
+  };
 
   const getFileList = async () => {
     // let fileList = [];
-    let data = Storage.list('sen_') // for listing ALL files without prefix, pass '' instead
-    .then(result => {
-      return result;
-    }).catch(err => console.log(err));
+    // debugger;
+    let data = Storage.list("sen_v2") // for listing ALL files without prefix, pass '' instead
+      .then((result) => {
+        return result;
+      })
+      .catch((err) => console.log(err));
     return data;
-  }
+  };
 
   const getSentenceData = async () => {
     let fileList = await getFileList();
-    let list = []; 
-    fileList.map((r) => {
-      list.push(r.key);
-    })
-
-    for (let i = 0 ; i < list.length, i < 7; i++) {
-      await Storage.get(`${list[i]}`, { level: "public" })
-      .then(result => 
-        readTextFile(result)
-      ).catch(err => console.log(err));
-    }
-    
-  }
-  
-  const onChange = (input) => {
-    setInput(input);
-    console.log("Input changed", input);
-    keyboard.current.setInput(input);
-    let predictionary = Predictionary.instance();
-    predictionary.addWords(suggestionsJson);
-    let suggestions = predictionary.predict(input);
-    setSuggestions(suggestions);
-  };
-
-  const handleSuggestions = (suggestion, index) => {
-    console.log("suggestion ", suggestion, "  index ", index);
-    const lastSpaceCharacterIndex = input.lastIndexOf(" ");
-    const substring = input.substring(0, lastSpaceCharacterIndex + 1);
-    setInput(substring + `${suggestion}` + " ");
-    keyboard.current.setInput(substring + `${suggestion}` + " ");
-  };
-  const handleShift = () => {
-    const newLayoutName = layout === "default" ? "shift" : "default";
-    setLayout(newLayoutName);
-  };
-  const onKeyPress = (button) => {
-    console.log("Button pressed", button);
-
-    /**
-     * If you want to handle the shift and caps lock buttons
-     */
-    if (button === "{shift}" || button === "{lock}") handleShift();
-  };
-
-  const onChangeInput = (event) => {
-    const input = event.target.value;
-    setInput(input);
-  };
-  const detectFrame = (video, model) => {
-    model.detect(video).then((predictions) => {
-      renderPredictions(predictions);
-      requestAnimationFrame(() => {
-        detectFrame(video, model);
+    // debugger;
+    let list = [];
+    if (!!fileList) {
+      fileList.map((r) => {
+        list.push(r.key);
       });
+      let listText = [];
+
+      for (let i = 0; i < list.length; i++) {
+        await Storage.get(`${list[i]}`, { level: "public" })
+          .then((result) => {
+            listText = JSON.parse(readTextFile(result));
+          })
+          .catch((err) => console.log(err));
+      }
+
+      setSentence(listText);
+    }
+  };
+
+  const detectFrame = (video, model) => {
+    console.log({ video, model });
+    model.detect(video).then((predictions) => {
+      console.log({ predictions });
+      setData(
+        predictions.sort((item1, item2) =>
+          item1.class.localeCompare(item2.class)
+        )
+      );
     });
   };
 
-// Take snapshopt of canvas
-  const takePhoto = () => {
-    video = document.getElementById("video");
-    canvas1 = document.getElementById('canvas1');
-    photo = document.getElementById('photo');
-    width = 1366;
-    height = 768;
-    streaming = false;
-    loadVideo(video).then(() => {
-      video.addEventListener('canplay', function(ev) {
-        if (!streaming) {
-            height = video.videoHeight / (video.videoWidth / width);
-  
-            if (isNaN(height)) {
-                height = width / (4 / 3);
-            }
-  
-            video.setAttribute('width', screenwidth);
-            video.setAttribute('height', screenheight);
-            canvas1.setAttribute('width', width);
-            canvas1.setAttribute('height', height);
-            streaming = true;
-            var context = canvas1.getContext('2d');
-            canvas1.width = width;
-            canvas1.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            var data = canvas1.toDataURL('image/png');
-            photo.setAttribute('name', Date.now());
-            photo.setAttribute('src', data);
-            var link = document.createElement('a');
-            link.href = photo.src;
-            link.download = `${photo.name}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.location.reload();
-        }
-    }, false);
-    })
- }
+  const stopDetect = () => {
+    clearInterval(requestAnimationFrameRef.current);
+  };
 
-  const renderPredictions = (predictions) => {
-    setData(predictions);
+  const startDetect = (initModel) => {
+    requestAnimationFrameRef.current = setInterval(() => {
+      if (isIPCamera) {
+        detectFrame(image.current, initModel);
+      } else {
+        detectFrame(video.current, initModel);
+      }
+    }, 3000);
+  };
+
+  const clearCanvas = () => {
+    const c = document.getElementById("canvas");
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  };
+
+  const choiceObject = (objectChoice) => {
+    // did not choice object
+    setIsOpenKeyboard(false);
+    setIsSpeak(false);
+    setInputKeyboard("");
+    if (currentChoice == null) {
+      stopDetect();
+
+      setCurrentChoice(objectChoice);
+      renderPredictions(data, objectChoice);
+    }
+    // change object other
+    else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
+      stopDetect();
+
+      setIsShowList(false);
+      setInputKeyboard("");
+      setIsOpenKeyboard(false);
+      setCurrentChoice(objectChoice);
+      renderPredictions(data, objectChoice);
+    }
+    // dont choice object
+    else {
+      startDetect(model);
+
+      setIsShowList(false);
+      setInputKeyboard("");
+      setIsOpenKeyboard(false);
+      setCurrentChoice(null);
+      clearCanvas();
+    }
+  };
+
+  const sentenceOfCurrent = useMemo(() => {
+    if (!sentence || !currentChoice) return [];
+
+    const obSentenceOfCurrent = sentence.find(
+      (textOfObject) => textOfObject.type == currentChoice.class
+    );
+    const defaultSentence = sentence.find(
+      (textOfObject) => textOfObject.type == "default"
+    );
+    // return default sentence text
+    if (!obSentenceOfCurrent) return defaultSentence?.sentence;
+    // return default and current sentence text
+    return [...obSentenceOfCurrent?.sentence, ...defaultSentence?.sentence];
+  }, [sentence, currentChoice]);
+
+  useEffect(() => {
+    sentenceOfCurrent.length > 0 && setCurrentText(sentenceOfCurrent[0]);
+  }, [sentenceOfCurrent]);
+
+  const renderPredictions = (predictions, currentChoice) => {
+    console.log({ predictions, currentChoice });
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
-    let heightModifyCount = 0
-    let currentCamHeight = screenheight
+    let heightModifyCount = 0;
+    let currentCamHeight = screenheight;
     let currentCamWidth = screenwidth;
 
-    if (screenwidth/screenheight !== camWidth/camHeight) {
-      currentCamHeight = camHeight * screenwidth / camWidth;
+    const camWidth = camWidthRef.current;
+    const camHeight = camHeightRef.current;
+
+    if (screenwidth / screenheight !== camWidth / camHeight) {
+      currentCamHeight = (camHeight * screenwidth) / camWidth;
       heightModifyCount = (screenheight - currentCamHeight) / 2;
-      currentCamWidth = screenwidth
+      currentCamWidth = screenwidth;
     }
 
     if (c) {
@@ -324,63 +556,50 @@ const DefaultCamera = (props) => {
       ctx.font = font;
       ctx.textBaseline = "top";
 
-      predictions.forEach((prediction) => {
-        let [ x, y, width, height ] = prediction.bbox;
-        x = x * currentCamWidth / camWidth;
-        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
-        width = width * currentCamWidth / camWidth;
-        height = height * currentCamHeight / camHeight;
-        // Draw the bounding box.
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(x, y, width, height);
-        // Draw the label background.
-        ctx.fillStyle = "gray";
-        const textWidth = ctx.measureText(prediction.class).width;
-        const textHeight = parseInt(font, 10); // base 10
-        ctx.fillRect(x + 30, y, textWidth + 4, textHeight + 4);
-      });
+      const predictionChoice = predictions.filter(
+        (prediction) => prediction.bbox[0] === currentChoice.bbox[0]
+      );
 
-      predictions.forEach((prediction) => {
-        let [ x, y ] = prediction.bbox;
-        x = x * currentCamWidth / camWidth;
-        y = (y * currentCamHeight / camHeight) + heightModifyCount ;
-        // Draw the text last to ensure it's on top.
-        ctx.fillStyle = "#000000";
-        ctx.fillText(prediction.class, x + 30, y);
-      });
+      if (!!predictionChoice) {
+        predictionChoice.forEach((prediction) => {
+          let [x, y, width, height] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          width = (width * currentCamWidth) / camWidth;
+          height = (height * currentCamHeight) / camHeight;
+          // Draw the bounding box.
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x, y, width, height);
+          // Draw the label background.
+          ctx.fillStyle = "gray";
+          const textWidth = ctx.measureText(prediction.class).width;
+          const textHeight = parseInt(font, 10); // base 10
+          ctx.fillRect(x + 30, y, textWidth + 4, textHeight + 4);
+        });
+
+        predictionChoice.forEach((prediction) => {
+          let [x, y] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          // Draw the text last to ensure it's on top.
+          ctx.fillStyle = "#000000";
+          ctx.fillText(prediction.class, x + 30, y);
+        });
+      }
     }
   };
 
-  const handleObject = (e) => {
-    console.log("clicked");
-    setDetectedObject(e.target.value);
-    setStarter(true);
-    setFkeyboard(false);
-    setKeyboardFlag(false);
-  };
-  
-  const getList = () => {
-    setSentence(sentenceList);
-  }
-
-  const findSentences = (value) => {
-    console.log('value')
-    let result = presentences && presentences.length && presentences.map((j) => (j.name === value ? j.value : ""));
-    setSentence(result);
-  };
-  const handleKeyboard = () => {
-    // setInput('')
-    setKeyboardFlag(true);
-  };
-  const handleBack = () => {
-    setStarter(false);
-  };
-  const speakText = () => {
+  // speaker
+  const speakText = (text) => {
+    setIsWaitingSpeak(true);
     connect();
 
     // Create the Polly service object and presigner object
-    const finalData = { ...text, Text: input };
+    const finalData = {
+      ...initSpeak,
+      Text: inputKeyboard ? inputKeyboard : text,
+    };
     console.log("Final Polly Data", finalData);
 
     if (finalData.Text !== "") {
@@ -392,27 +611,26 @@ const DefaultCamera = (props) => {
         .catch((err) => console.log(err));
     }
 
-    var polly = new AWS.Polly({ apiVersion: "2016-06-10" });
-    var signer = new AWS.Polly.Presigner(finalData, polly);
+    let polly = new AWS.Polly({ apiVersion: "2016-06-10" });
+    let signer = new AWS.Polly.Presigner(finalData, polly);
 
     // Create presigned URL of synthesized speech file
     signer.getSynthesizeSpeechUrl(finalData, function (error, url) {
       if (error) {
         console.log("error polly speak ", error);
       } else {
-          pollyaudioplay(url).then(function () {
+        setIsWaitingSpeak(false);
+        pollyaudioplay(url).then(function () {
           setTimeout(() => {
-            setParent(false);
-          }, 3000);
-          setKeyboardFlag(false);
-          setStarter(false);
-          setSuggestions(false);
+            setIsSpeak(false);
+          }, 1000);
         });
       }
     });
   };
   const pollyaudioplay = (audiosource) => {
     return new Promise(function (resolve, reject) {
+      setIsSpeak(true);
       document.getElementById("audioSource").src = audiosource;
       document.getElementById("audioPlayback").load();
       document.getElementById("audioPlayback").play();
@@ -427,205 +645,339 @@ const DefaultCamera = (props) => {
       IdentityPoolId: "us-east-1:47c46f2d-f5b1-4857-9d20-27b64cf32b2c",
     });
   };
-  const handleConfirmSpeak = () => {
-    setConfirmSpeak(true);
+  // keyboard
+  const onChange = (input) => {
+    setInputKeyboard(input);
   };
-  const handleGoBack = () => {
-    setConfirmSpeak(false);
+
+  const handleShift = () => {
+    const newLayoutName =
+      currentLayoutKeyboard === "default" ? "shift" : "default";
+    setCurrentLayoutKeyboard(newLayoutName);
   };
-  const handleClear = () => {
-    setInput("");
-    keyboard.current.setInput("");
+
+  const onKeyPress = (button) => {
+    // If you want to handle the shift and caps lock buttons
+    if (button === "{shift}" || button === "{lock}") handleShift();
   };
-  const handleSentence = (sentence) => {
-    setKeyboardFlag(true);
-    setConfirmSpeak(true);
-    setInput(`${sentence}`);
+
+  const nextItem = () => {
+    document.getElementById("listPredictions").scrollLeft += 500;
   };
+
+  const backItem = () => {
+    document.getElementById("listPredictions").scrollLeft -= 500;
+  };
+
+  const toggleShowList = () => {
+    if (isShowList) {
+      setIsShowList(false);
+    } else {
+      setIsShowList(true);
+      setIsOpenKeyboard(false);
+      setCurrentText("");
+      setInputKeyboard("");
+    }
+  };
+
+  const choiceTextSpeak = (text) => {
+    setCurrentText(text);
+    speakText(text);
+  };
+
+  // take a photo
+  const takePhoto = () => {
+    let video = document.getElementById("video");
+    let canvas1 = document.getElementById("canvas1");
+    let photo = document.getElementById("photo");
+    let photoIpCamera = document.getElementById("imgTest");
+    let width = 1366;
+    let height = 768;
+    let streaming = false;
+
+    if (isIPCamera) {
+      canvas1.setAttribute("width", width);
+      canvas1.setAttribute("height", height);
+
+      let context = canvas1.getContext("2d");
+      canvas1.width = width;
+      canvas1.height = height;
+      photoIpCamera.src = localStorage.getItem("ipAddress");
+      context.drawImage(photoIpCamera, 0, 0, width, height);
+
+      console.log({ canvas1 });
+      let data = canvas1
+        .toDataURL("image/png")
+        .replace("image/png", "image/octet-stream");
+      console.log({ data });
+
+      photo.setAttribute("name", Date.now());
+      photo.setAttribute("src", data);
+      let link = document.createElement("a");
+      link.href = photo.src;
+      link.download = `${photo.name}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // window.location.reload();
+      photo.removeAttribute("name");
+      photo.removeAttribute("src");
+      canvas1.removeAttribute("width");
+      canvas1.removeAttribute("height");
+    } else {
+      loadVideo(video).then(() => {
+        video.addEventListener(
+          "canplay",
+          function (ev) {
+            if (!streaming) {
+              height = video.videoHeight / (video.videoWidth / width);
+
+              if (isNaN(height)) {
+                height = width / (4 / 3);
+              }
+
+              // video.setAttribute("width", screenwidth);
+              // video.setAttribute("height", screenheight);
+              canvas1.setAttribute("width", width);
+              canvas1.setAttribute("height", height);
+              streaming = true;
+              let context = canvas1.getContext("2d");
+              canvas1.width = width;
+              canvas1.height = height;
+              context.drawImage(video, 0, 0, width, height);
+              let data = canvas1.toDataURL("image/png");
+              console.log({ data });
+              photo.setAttribute("name", Date.now());
+              photo.setAttribute("src", data);
+              let link = document.createElement("a");
+              link.href = photo.src;
+              link.download = `${photo.name}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              // window.location.reload();
+              photo.removeAttribute("name");
+              photo.removeAttribute("src");
+              canvas1.removeAttribute("width");
+              canvas1.removeAttribute("height");
+            }
+          },
+          false
+        );
+      });
+    }
+  };
+
   return (
-    <>
-      {parent && <PollySpeaking audioText={input != "" ? { input } : ""} />}
-      <Container style={{ display: parent && "none" }} fluid={true}>
+    <React.Fragment>
+      <Container fluid={true}>
         <Row>
-          {keyboardFalg ? (
-            <>
-              <Col
-                md={3}
-                style={{
-                  position: "absolute",
-                  padding: "0px",
-                  marginTop: "0px",
-                  float: "right",
-                  marginRight:"-169px",
-                  backgroundColor: "rgb(255, 255, 255, 0.5)",
-                  height: "100%",
-                  zIndex: 999
-                }}
-              >
-                {confirmSpeak ? (
-                  <>
-                    <Col md={12} style={{ padding: "0px", marginTop: "0px" }}>
-                      <h1 className="sentence-checker">
-                        Is this Sentence Correct?
-                      </h1>
-                      {input && <p className="pollyText">{input}</p>}
-                      <Row>
-                          <div className="speak-now" style={{margin: "auto", marginTop: "20px"}} onClick={speakText}>
-                            Yes-Speak
-                          </div>
-                          <div className="back-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleGoBack}>
-                            {" "}
-                            No-Go Back{" "}
-                          </div>
-                      </Row>
-                      <br />
-                      <Row>
-                        <Col ms={12}>
-                          <audio
-                            id="audioPlayback"
-                            controls
-                            style={{ display: "none" }}
-                          >
-                            <source id="audioSource" type="audio/mp3" src="" />
-                          </audio>
-                        </Col>
-                      </Row>
-                    </Col>
-                  </>
-                ) : (
-                  <>
-                    <h5>Suggested:</h5>
-                    {suggestions &&
-                      suggestions.map((suggestion, index) => {
-                        return (
-                          <>
-                            <span
-                              className="suggestions"
-                              key={index}
-                              onClick={() =>
-                                handleSuggestions(suggestion, index)
-                              }
-                            >
-                              {" "}
-                              {suggestion}{" "}
-                            </span>
-                          </>
-                        );
-                      })}
-                    <br />
-                    {fkeyboard ? (
-                      <Keyboard
-                        keyboardRef={(r) => (keyboard.current = r)}
-                        layout={customLayout}
-                        layoutName={layout}
-                        onChange={onChange}
-                        onKeyPress={onKeyPress}
-                      />
-                    ) : ''}
-                    <Row>
-                        <div className="speak-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleConfirmSpeak}>
-                          {" "}
-                          Speak{" "}
-                        </div>
-                        <div className="clear-btn" style={{margin: "auto", marginTop: "20px"}} onClick={handleClear}>
-                          {" "}
-                          Clear{" "}
-                        </div>
-                    </Row>
-                  </>
-                )}
-              </Col>
-            </>
-          ) : (
-            <>
-              {starter && (
-                <>
-                  <Col
-                    md={3}
-                    style={{
-                      position: "absolute",
-                      padding: "0px",
-                      marginTop: "0px",
-                      float: "right",
-                      marginRight:"-169px",
-                      backgroundColor: "rgb(255, 255, 255, 0.5)",
-                      height: "100%",
-                      zIndex: 999
-                    }}
-                  >
-                    <h1 className="sentence-stater">Sentence Starters</h1>
-                    {senetnce ? senetnce.map((s) => {
-                      return(
-                        <p
-                        className="demo-text"
-                        id="demo-text"
-                        onClick={() => handleSentence(s)}
-                      >
-
-                        {s}
-                      </p>
-                      )
-                    }) : (
-                      <p className="demo-text">No Sentence</p>
-                    )}
-                    <div className="btn-wrapper" onClick={handleKeyboard}>
-                      Start New Sentence
-                    </div>
-                    <div className="btn-wrapper-black" onClick={handleBack}>
-                      Exit Writing App
-                    </div>
-                  </Col>
-                </>
-              )}
-            </>
-          )}
-
-          <Col
-          >
-            <video id="video" width={screenwidth} height={screenheight} />
-            {keyboardFalg === true &&
-              confirmSpeak === false &&
-              selectedOption !== "normal keyboard" && (
-                <input
-                  value={input}
-                  placeholder={"Tap on the virtual keyboard to start"}
-                  // onChange={onChangeInput}
-                  className="inputData"
-                />
-              )}
-            {keyboardFalg === true &&
-              confirmSpeak === false &&
-              selectedOption === "normal keyboard" && (
-                <WrapperInput>
-                  <input
-                    value={input}
-                    placeholder={"Tap on the virtual keyboard to ..."}
-                    onChange={onChangeInput}
-                    className="inputData"
-                  />
-                </WrapperInput>
-              )}
-            <canvas id="canvas" width={screenwidth} height={screenheight}/>
-            <canvas id="canvas1" width={screenwidth} height={screenheight}/>
-            <div class="output">
-              <img id="photo" /> 
+          <Col className="p-0">
+            <video
+              id="video"
+              width={screenwidth}
+              height={screenheight}
+              ref={(node) => (video.current = node)}
+            />
+            <canvas id="canvas" width={screenwidth} height={screenheight} />
+            <canvas id="canvas1" width={screenwidth} height={screenheight} />
+            <img
+              className="w-100 position-fixed"
+              id="imgTest"
+              ref={(node) => {
+                if (!node) {
+                  return;
+                }
+                image.current = node;
+                const img = node;
+                const updateFunc = () => {
+                  imageLoaded.current = true;
+                };
+                img.onload = updateFunc;
+                if (img.complete) {
+                  updateFunc();
+                }
+              }}
+              alt=""
+            />
+            <canvas id="myCanvas" />
+            <div className="output">
+              <img id="photo" />
             </div>
           </Col>
-        </Row>
-      </Container>
 
-      {/* )} */}
-      {parent === false && (
-        <Footer
-          handleKeyboard={handleKeyboard}
-          changeKeyBoardStatus={changeKeyBoardStatus}
-          optionsKeyBoard={optionsKeyBoard}
-          takePhoto={takePhoto}
-          setSelectopOption={setSelectopOption}
-          toggleSidebar={handleObject}
-        />
-      )}
-    </>
+          <Predictions>
+            {!!currentChoice && (
+              <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4 align-items-end">
+                <div>
+                  {isShowList && (
+                    <div className="list-suggestion">
+                      {sentenceOfCurrent
+                        .filter((item) => item !== sentenceOfCurrent[0])
+                        .map((item, index) => (
+                          <div
+                            key={index}
+                            className={`text-bg my-2 button_click_cursor ${
+                              item === currentText ? "active" : ""
+                            }`}
+                            onClick={() => choiceTextSpeak(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  {!isShowList && (
+                    <div className="icon text-mess text-bg">
+                      {inputKeyboard !== ""
+                        ? inputKeyboard
+                        : sentenceOfCurrent[0]}
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={`icon-circle talk ${isSpeak ? "active" : ""}`}
+                  onClick={() => speakText(currentText)}
+                >
+                  <audio
+                    id="audioPlayback"
+                    controls
+                    style={{ display: "none" }}
+                  >
+                    <source id="audioSource" type="audio/mp3" src="" />
+                  </audio>
+                  {isWaitingSpeak ? (
+                    <img src={Spinner} alt="" />
+                  ) : (
+                    <img src={TalkIcon} alt="" />
+                  )}
+                </div>
+                <div
+                  className={`icon-circle cancel-mess ${
+                    isShowList ? "active" : ""
+                  }`}
+                  onClick={() => toggleShowList()}
+                >
+                  <img src={CancelMess} alt="" />
+                </div>
+                <div
+                  className="keyboard"
+                  onClick={() => setIsOpenKeyboard(!isOpenKeyboard)}
+                >
+                  <img src={KeyboardIcon} alt="" />
+                </div>
+              </div>
+            )}
+            <div className="d-flex w-100">
+              <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
+                {data.length > 3 && <img src={Back} alt="back" />}
+              </Navigate>
+              <ListPredictions id={"listPredictions"}>
+                {data.length > 0 &&
+                  data.map((item, index) => (
+                    <ItemPredictions
+                      className={
+                        currentChoice != null &&
+                        item.bbox[0] === currentChoice.bbox[0]
+                          ? "active"
+                          : ""
+                      }
+                      key={index}
+                      onClick={() => choiceObject(item)}
+                    >
+                      <span>{item.class}</span>
+                    </ItemPredictions>
+                  ))}
+              </ListPredictions>
+              <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
+                {data.length > 3 && <img src={Next} alt="next" />}
+              </Navigate>
+            </div>
+          </Predictions>
+        </Row>
+        {!isReady && (
+          <div
+            className="pending-load"
+            style={{ width: screenwidth, height: screenheight }}
+          >
+            <div className="start-detecting">
+              <img src={LockImg} className="mr-3" alt="lock" />
+              <span className="mr-3">Start detecting</span>
+              <img src={Spinner} alt="" />
+            </div>
+          </div>
+        )}
+        {isOpenKeyboard && (
+          <Keyboard
+            // keyboardRef={(r) => onChange(r)}
+            layoutName={currentLayoutKeyboard}
+            onChange={onChange}
+            onKeyPress={onKeyPress}
+            value={inputKeyboard}
+          />
+        )}
+        {isReady && (
+          <div className="control-hardware">
+            <div
+              className="fast-left"
+              onMouseDown={() => mouseOverFastLeft()}
+              onMouseUp={() => stop()}
+            >
+              <img src={FastLeft} alt="" />
+            </div>
+            <div
+              className="slow-left"
+              onMouseDown={() => mouseOverSlowLeft()}
+              onMouseUp={() => stop()}
+            >
+              <img src={Back} alt="" />
+            </div>
+            <div className="center">
+              <div
+                className="top"
+                onMouseDown={() => mouseOverTop()}
+                onMouseUp={() => stop()}
+              >
+                <img src={Top} alt="" />
+              </div>
+              <div
+                className="bottom"
+                onMouseDown={() => mouseOverBottom()}
+                onMouseUp={() => stop()}
+              >
+                <img src={Bottom} alt="" />
+              </div>
+            </div>
+            <div
+              className="slow-right"
+              onMouseDown={() => mouseOverSlowRight()}
+              onMouseUp={() => stop()}
+            >
+              <img src={Next} alt="" />
+            </div>
+            <div
+              className="fast-right"
+              onMouseDown={() => mouseOverFastRight()}
+              onMouseUp={() => stop()}
+            >
+              <img src={FastRight} alt="" />
+            </div>
+          </div>
+        )}
+        {isReady && <Footer takePhoto={takePhoto} />}
+        {isReady && (
+          <div
+            className="btn-setting"
+            onClick={() => {
+              vidOff();
+              history.push(routes.setting);
+            }}
+          >
+            <img src={SettingIcon} alt="" />
+          </div>
+        )}
+      </Container>
+    </React.Fragment>
   );
 };
 

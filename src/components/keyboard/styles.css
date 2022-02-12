@@ -1,15 +1,15 @@
 input {
-    width: 30%;
-    height: 100px;
+    /*width: 30%;*/
+    /*height: 100px;*/
     padding: 20px;
-    font-size: 20px;
+    /*font-size: 20px;*/
     border: none;
     box-sizing: border-box;
   }
   
-  .simple-keyboard {
-    max-width: 650px;
-  }
+  /*.simple-keyboard {*/
+  /*  max-width: 650px;*/
+  /*}*/
   
   .hg-theme-default .hg-button {
     box-shadow: 0px 0px 3px -1px rgba(0, 0, 0, 0.3);

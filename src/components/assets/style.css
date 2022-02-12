@@ -3,6 +3,21 @@
   top: 0;
   left: 0;
   display: block;
+  cursor: auto;
+  z-index: 1;
+}
+#canvas1 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  cursor: auto;
+}
+#myCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
 }
 
 #video {
@@ -81,13 +96,17 @@
 
 .simple-keyboard {
   max-width: 550px;
+  position: fixed;
+  bottom: 40%;
+  right: 4rem;
+  z-index: 10;
 }
 .suggestion-Wrapper{
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  padding: 10px;;
+  padding: 10px;
   margin-top: 830px;
   margin-left: 50px;
   width: 70%;
@@ -305,4 +324,152 @@
 
 ::-webkit-scrollbar {
   display: none;
+}
+.pending-load {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #a2a2a2;
+}
+.start-detecting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff96;
+  border-radius: 20px;
+  padding: 10px 30px;
+}
+
+.start-detecting img {
+  width: 40px;
+}
+.action-list .icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #5757578c;
+  mix-blend-mode: hard-light;
+}
+.action-list .text-mess {
+  height: 70px;
+  position: relative;
+  margin-right: 60px;
+}
+.action-list .text-bg {
+  background: #ffffffb8;
+  mix-blend-mode: hard-light;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+.text-mess:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -40px;
+  width: 0;
+  height: 0;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+
+  border-left: 40px solid #ffffffb8;
+}
+.action-list .keyboard {
+  height: 70px;
+  width: 210px;
+  background: #FFFFFF8c;
+  mix-blend-mode: hard-light;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.keyboard img {
+  width: 40%;
+  height: auto;
+}
+.icon-circle img {
+  width: 60%;
+}
+.icon-circle.active {
+  background-color: #e60000;
+}
+.text-bg.active {
+  background-color: #e60000;
+  color: #ffffff;
+}
+.control-hardware {
+  position: fixed;
+  z-index: 1;;
+  width: 100%;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+.slow-left img, .slow-right img, .fast-right img, .fast-left img {
+  height: 90px;
+}
+.center img {
+  width: 90px;
+}
+.control-hardware .fast-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware div {
+  cursor: pointer;
+}
+.control-hardware .slow-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware .center {
+  flex: 2;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.control-hardware .slow-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.control-hardware .fast-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.btn-setting {
+  position: fixed;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  background: #5757578c;
+  border-bottom-right-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 20px 40px 20px 50px;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  z-index: 1;
+}
+.btn-setting img {
+  width: 70%;
 }
