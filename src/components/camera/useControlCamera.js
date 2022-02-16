@@ -4,66 +4,38 @@ const useControlCamera = () => {
   const {
     PanRight,
     PanLeft,
-    //FastPanLeft,
-    //FastPanRight,
+    FastPanLeft,
+    FastPanRight,
     TiltDown,
-    AdjustSpeed,
+    // AdjustSpeed,
     TiltUp,
-    Stop,
+    // Stop,
   } = HardwareCamera();
 
   const mouseOverFastRight = () => {
     console.log("fast-right");
-    //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      AdjustSpeed("2");
-      PanRight();
-    // } else if (
-    //   localStorage.getItem("cameraType") === "arduino - bldc" ||
-    //   localStorage.getItem("cameraType") === "raspberrypi"
-    // )
-    //   FastPanRight();
+    FastPanRight();
   };
 
   const mouseOverSlowRight = () => {
     console.log("slow-right");
-    //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      AdjustSpeed("1");
-      PanRight();
-    // } else if (
-    //   localStorage.getItem("cameraType") === "arduino - bldc" ||
-    //   localStorage.getItem("cameraType") === "raspberrypi"
-    // )
-      //PanRight();
+    PanRight();
   };
 
   const stop = () => {
     console.log("stop");
     //if (localStorage.getItem("cameraType") === "arduino - servo") 
-      Stop();
+    // Stop();
   };
 
   const mouseOverFastLeft = () => {
     console.log("fast-left");
-    //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      AdjustSpeed("2");
-      PanLeft();
-    // } else if (
-    //   localStorage.getItem("cameraType") === "arduino - bldc" ||
-    //   localStorage.getItem("cameraType") === "raspberrypi"
-    // )
-    //   FastPanLeft();
+    FastPanLeft();
   };
 
   const mouseOverSlowLeft = () => {
     console.log("slow-left");
-    //if (localStorage.getItem("cameraType") === "arduino - servo") {
-      AdjustSpeed("1");
-      PanLeft();
-    // } else if (
-    //   localStorage.getItem("cameraType") === "arduino - bldc" ||
-    //   localStorage.getItem("cameraType") === "raspberrypi"
-    // )
-    //   PanLeft();
+    PanLeft();
   };
 
   const mouseOverTop = () => {

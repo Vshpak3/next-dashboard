@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const net = window.require("net");
 const SerialPort = window.require("serialport");
 
+
+
 const HardwareCamera = () => {
-  let globalPort;
+  const [globalPort, setGlobalPort] = useState();
   // const client = new net.Socket();
 
   // if (
@@ -26,7 +28,7 @@ const HardwareCamera = () => {
   //   }
   // }
 
-  const createPort = async(portPath) => {
+  const createPort = (portPath) => {
     var port = new SerialPort(portPath, {
     	baudRate: 9600,
     	}, function(err) {
@@ -54,10 +56,9 @@ const HardwareCamera = () => {
     //   }
     // }, 1000);
 
-    globalPort = port;
-
     port.on("open", function () {
       console.log("i have opened properly");
+      setGlobalPort(port);
       port.setEncoding("utf8"); // important line
     });
 
@@ -65,27 +66,30 @@ const HardwareCamera = () => {
     port.on("readable", function (data) {
       console.log(port.read());
     });
+
+    return port
   };
 
   const tryPort = async(path) => {
     var result = false;
     var tempPort = new SerialPort(path, {autoOpen: false});
-    setTimeout(function() {
-      console.log('trying open');
-      try {
-        tempPort.open(function (err) {
+    
+    await wait(1000);
+
+    try {
+      tempPort.open(function (err) {
         if (err) {
           console.log('Error opening port: ', err.message);
         }
         else {
-          console.log('Successfully opened port');
+          console.log(`Successfully opened port ${path}`);
+          result = true
         }
-        });
-      }
-      catch (e) {
-        console.log('caught', e);
-      }
-    }, 1000);
+      });
+    }
+    catch (e) {
+      console.log('caught', e);
+    }
   
     tempPort.setEncoding('hex');
   
@@ -102,7 +106,9 @@ const HardwareCamera = () => {
     await wait(1000);
     console.log(path);
     // close port
-    tempPort.close();
+    if (tempPort.isOpen) tempPort.close();
+    await wait(1000);
+    console.log(`try ${path} success.`)
     return result;
   }
 
@@ -152,13 +158,13 @@ const HardwareCamera = () => {
     });
   };
 
-  const AdjustSpeed = (speed) => {
-    if(!globalPort) {
-      return;
-    }
-    // if (localStorage.getItem("cameraType") === "arduino - servo")
-      globalPort.write(speed);
-  };
+  // const AdjustSpeed = (speed) => {
+  //   if(!globalPort) {
+  //     return;
+  //   }
+
+  //   globalPort.write(speed);
+  // };
 
   //console.log({ globalPort });
 
@@ -166,86 +172,31 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
-    // if (localStorage.getItem("cameraType") === "arduino - servo") {
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
 
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-
-    //   globalPort.write("b");
-    //   globalPort.write("b");
-    //   globalPort.write("b");
-    // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
-      globalPort.write("r");
-    // else if (localStorage.getItem("cameraType") === "raspberrypi")
-    //   client.write("r");
+    globalPort.write("r");
   };
 
   const FastPanRight = () => {
     if(!globalPort) {
       return;
     }
-    // if (localStorage.getItem('cameraType') == 'raspberrypi')	
-    //   client.write('fr');
-    // if (localStorage.getItem('cameraType') == 'arduino - bldc')
-      globalPort.write('R');
-      globalPort.write('R');
-      globalPort.write('R');
-      globalPort.write('R');
+
+    globalPort.write('R');
   };
 
   const PanLeft = () => {
     if(!globalPort) {
       return;
     }
-    // if (localStorage.getItem("cameraType") === "arduino - servo") {
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
-    //   globalPort.write("x");
 
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-    //   globalPort.write("r");
-
-    //   globalPort.write("b");
-    //   globalPort.write("b");
-    //   globalPort.write("b");
-    // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
-      globalPort.write("l");
-    // else if (localStorage.getItem("cameraType") === "raspberrypi")
-    //   client.write("l");
+    globalPort.write("l");
   };
 
   const FastPanLeft = () => {
-    // if(!globalPort) {
-    //   return;
-    // }
-    // if (localStorage.getItem("cameraType") === "raspberrypi")
-    //   client.write("fl");
-    // if (localStorage.getItem("cameraType") === "arduino - bldc")
-      globalPort.write("L");
+    if(!globalPort) {
+      return;
+    }
 
-    globalPort.write("L");
-    globalPort.write("L");
     globalPort.write("L");
   };
 
@@ -253,45 +204,24 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
-    // if (localStorage.getItem("cameraType") === "arduino - servo") {
-    //   globalPort.write("w");
-    //   globalPort.write("w");
-    //   globalPort.write("w");
-
-    //   globalPort.write("e");
-    //   globalPort.write("e");
-    //   globalPort.write("e");
-    // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
-      globalPort.write("u");
-    // else if (localStorage.getItem("cameraType") === "raspberrypi")
-    //   client.write("u");
+    
+    globalPort.write("u");
   };
 
   const TiltDown = () => {
     if(!globalPort) {
       return;
     }
-    // if (localStorage.getItem("cameraType") === "arduino - servo") {
-    //   globalPort.write("q");
-    //   globalPort.write("q");
-    //   globalPort.write("q");
-
-    //   globalPort.write("e");
-    //   globalPort.write("e");
-    //   globalPort.write("e");
-    // } else if (localStorage.getItem("cameraType") === "arduino - bldc")
-      globalPort.write("d");
-    // else if (localStorage.getItem("cameraType") === "raspberrypi")
-    //   client.write("d");
+    globalPort.write("d");
   };
 
-  const Stop = () => {
-    if(!globalPort) {
-      return;
-    }
-    // if (localStorage.getItem("cameraType") === "arduino - servo")
-      globalPort.write("s");
-  };
+  // const Stop = () => {
+  //   if(!globalPort) {
+  //     return;
+  //   }
+  //   // if (localStorage.getItem("cameraType") === "arduino - servo")
+  //     globalPort.write("s");
+  // };
 
   return {
     handlePorts,
@@ -300,9 +230,7 @@ const HardwareCamera = () => {
     FastPanLeft,
     FastPanRight,
     TiltDown,
-    TiltUp,
-    AdjustSpeed,
-    Stop,
+    TiltUp
   };
 };
 export default HardwareCamera;
