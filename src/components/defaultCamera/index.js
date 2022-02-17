@@ -21,7 +21,9 @@ import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
 import SettingIcon from "../assets/setting.png";
 import HomeIcon from "../assets/home.png";
+import TakePhotoIcon from "../assets/takephoto.png";
 import PhotoIcon from "../assets/photos.png";
+import RecordingIcon from "../assets/recording_polly.png";
 import CameraControll from "../assets/camera.png";
 // import { LogoIcon } from "../../../common/logo-icon";
 // import { LogoIcon } from "../../common/logo-icon";
@@ -184,6 +186,7 @@ const DefaultCamera = (props) => {
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
   const [isLogoClicked, setIsLogoClicked] = useState(false);
+  const [isTriangleClicked, setIsTriangleClicked] = useState(false);
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -931,7 +934,7 @@ const DefaultCamera = (props) => {
             value={inputKeyboard}
           />
         )}
-        {isReady && (
+        {(isReady && !isTriangleClicked) && (
           <div className="control-hardware">
             {
               isLogoClicked ?
@@ -964,7 +967,7 @@ const DefaultCamera = (props) => {
                 <img src={Top} alt="" />
               </div>
               <div
-                className="bottom"
+                // className="bottom"
                 onMouseDown={() => mouseOverBottom()}
                 onMouseUp={() => stop()}
               >
@@ -1033,7 +1036,7 @@ const DefaultCamera = (props) => {
                   left: '5%',
                 }
               }> */}
-                {/* <LogoIcon /> */}
+              {/* <LogoIcon /> */}
               {/* </div> */}
               {/* <LogoIconWrapper>
               </LogoIconWrapper> */}
@@ -1070,6 +1073,54 @@ const DefaultCamera = (props) => {
           <div className="btn-images">
             <div>
               <img src={PhotoIcon} alt="" />
+            </div>
+          </div>
+        )}
+        {(isReady && !isTriangleClicked) && (
+          <div className="control-bottom">
+            {/* <div className="btn-test"> */}
+            <div className="control-recording"
+              onClick={() => {
+                console.log('RECORD')
+              }}
+            >
+              <img src={RecordingIcon} alt="" />
+            </div>
+            <div className="triangle-container"
+              onClick={() => {
+                setIsTriangleClicked(!isTriangleClicked)
+              }}
+            >
+              <div className="control-triangle">
+                {/* <img src={HomeIcon} alt="" /> */}
+              </div>
+              <div className="control-bold-line">
+                {/* <img src={HomeIcon} alt="" /> */}
+              </div>
+            </div>
+            <div className="control-take-photo"
+              onClick={() => {
+                takePhoto()
+              }}
+            >
+              <img src={TakePhotoIcon} alt="" />
+            </div>
+            {/* </div> */}
+          </div>
+        )}
+        {(isReady && isTriangleClicked) && (
+          <div className="control-center">
+            <div className="triangle-container-center"
+              onClick={() => {
+                setIsTriangleClicked(!isTriangleClicked)
+              }}
+            >
+              <div className="control-bold-line-top">
+                {/* <img src={HomeIcon} alt="" /> */}
+              </div>
+              <div className="control-triangle-down">
+                {/* <img src={HomeIcon} alt="" /> */}
+              </div>
             </div>
           </div>
         )}

@@ -509,23 +509,91 @@
 .btn-images img {
   width: 70%;
 }
-.btn-take-photo div {
+.control-bottom {
   position: fixed;
-  left: -5px;
-  top: 70%;
-  transform: translateY(-50%);
+  z-index: 1;;
+  width: 100%;
+  top: 65%;
+  height: 200px;
   display: flex;
   justify-content: center;
-  background: #5757578c;
-  border-bottom-right-radius: 30px;
-  border-top-right-radius: 30px;
-  padding: 20px 40px 20px 50px;
-  border: 1px solid #ffffff;
-  cursor: pointer;
+  align-items: center;
   z-index: 1;
 }
-.btn-take-photo img {
-  width: 70%;
+.control-center {
+  position: fixed;
+  z-index: 1;;
+  width: 100%;
+  top: 25%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+.control-recording {
+  /* padding: 50px; */
+  padding-left: 150px;
+  padding-right: 150px;
+}
+.triangle-container {
+  background: #5757578c;
+  /* padding-left: 150px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  padding-right: 150px; */
+  padding: 30px;
+  border-radius: 50%;
+  border: 1px solid #ffffff;
+}
+.triangle-container:hover {
+  background: #ED157F;
+}
+.triangle-container-center {
+  background: #5757578c;
+  /* padding-left: 150px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  padding-right: 150px; */
+  padding: 30px;
+  border-radius: 50%;
+  border: 1px solid #ffffff;
+}
+.triangle-container-center:hover {
+  background: #ED157F;
+}
+.control-take-photo {
+  padding-left: 150px;
+  padding-right: 150px;
+}
+.control-bottom img {
+  width: 110px;
+}
+.control-triangle {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid white;
+}
+.control-triangle-down {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 30px solid white;
+}
+.control-bold-line {
+  height: 5px;
+  width: inherit;
+  margin-top: 5px;
+  background-color: white;
+}
+.control-bold-line-top {
+  height: 5px;
+  width: inherit;
+  margin-bottom: 5px;
+  background-color: white;
 }
 .btn-polly-logo div {
   position: absolute;
@@ -545,3 +613,4 @@
 .btn-polly-logo img {
   width: 70%;
 }
+
