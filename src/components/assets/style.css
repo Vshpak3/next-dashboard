@@ -527,3 +527,21 @@
 .btn-take-photo img {
   width: 70%;
 }
+.btn-polly-logo div {
+  position: absolute;
+  left: -10%;
+  top: 50%;
+  width: 120%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  /* background: #5757578c; */
+  border-radius: 30px;
+  padding: 20px 40px 20px 50px;
+  /* border: 1px solid #ffffff; */
+  cursor: pointer;
+  z-index: 1;
+}
+.btn-polly-logo img {
+  width: 70%;
+}

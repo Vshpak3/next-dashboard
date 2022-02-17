@@ -23,6 +23,9 @@ import SettingIcon from "../assets/setting.png";
 import HomeIcon from "../assets/home.png";
 import PhotoIcon from "../assets/photos.png";
 import CameraControll from "../assets/camera.png";
+// import { LogoIcon } from "../../../common/logo-icon";
+// import { LogoIcon } from "../../common/logo-icon";
+import { pollyLogo } from '../../common/polly-logo'
 
 
 import styled from "styled-components";
@@ -180,6 +183,7 @@ const DefaultCamera = (props) => {
   const [isOpenControl, setIsOpenControl] = useState(false);
   const [currentLayoutKeyboard, setCurrentLayoutKeyboard] = useState("default");
   const [inputKeyboard, setInputKeyboard] = useState("");
+  const [isLogoClicked, setIsLogoClicked] = useState(false);
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -929,13 +933,21 @@ const DefaultCamera = (props) => {
         )}
         {isReady && (
           <div className="control-hardware">
-            <div
-              className="fast-left"
-              onMouseDown={() => mouseOverFastLeft()}
-              onMouseUp={() => stop()}
-            >
-              <img src={FastLeft} alt="" />
-            </div>
+            {
+              isLogoClicked ?
+                (
+                  <div className="fast-left"></div>
+                )
+                : (
+                  <div
+                    className="fast-left"
+                    onMouseDown={() => mouseOverFastLeft()}
+                    onMouseUp={() => stop()}
+                  >
+                    <img src={FastLeft} alt="" />
+                  </div>
+                )
+            }
             <div
               className="slow-left"
               onMouseDown={() => mouseOverSlowLeft()}
@@ -991,6 +1003,44 @@ const DefaultCamera = (props) => {
           )
         } */}
         {isReady && (
+          <div className="btn-polly-logo"
+            style={{
+              position: 'fixed',
+              left: '1%',
+              top: '2%',
+              height: '11%',
+              width: '14%',
+              display: 'flex',
+              justifyContent: 'center',
+              background: isLogoClicked ? '#5757578c' : 'transparent',
+              borderRadius: '30px',
+              padding: '20px 40px 20px 50px',
+              cursor: 'pointer',
+              zIndex: 1
+            }}
+          >
+            <div
+
+              onClick={() => {
+                setIsLogoClicked(!isLogoClicked)
+              }}
+            >
+              <img src={pollyLogo} alt="" />
+              {/* <div id='polly' style={
+                {
+                  width: '175px',
+                  top: '50%',
+                  left: '5%',
+                }
+              }> */}
+                {/* <LogoIcon /> */}
+              {/* </div> */}
+              {/* <LogoIconWrapper>
+              </LogoIconWrapper> */}
+            </div>
+          </div>
+        )}
+        {(isReady && isLogoClicked) && (
           <div className="btn-home">
             <div
 
@@ -1003,7 +1053,7 @@ const DefaultCamera = (props) => {
             </div>
           </div>
         )}
-        {isReady && (
+        {(isReady && isLogoClicked) && (
           <div className="btn-setting">
             <div
 
@@ -1016,7 +1066,7 @@ const DefaultCamera = (props) => {
             </div>
           </div>
         )}
-        {isReady && (
+        {(isReady && isLogoClicked) && (
           <div className="btn-images">
             <div>
               <img src={PhotoIcon} alt="" />
@@ -1029,3 +1079,9 @@ const DefaultCamera = (props) => {
 };
 
 export default withRouter(DefaultCamera);
+
+
+
+const LogoIconWrapper = styled("div")`
+  text-align: center;
+`;
