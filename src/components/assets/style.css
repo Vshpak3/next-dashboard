@@ -529,9 +529,9 @@
 }
 .btn-polly-logo div {
   position: absolute;
-  left: -10%;
-  top: 50%;
-  width: 120%;
+  left: -20px;
+  top: 50px;
+  width: 215px;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;

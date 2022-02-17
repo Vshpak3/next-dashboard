@@ -987,7 +987,7 @@ const DefaultCamera = (props) => {
             </div>
           </div>
         )}
-        {isReady && <Footer takePhoto={takePhoto} />}
+        {/* {isReady && <Footer takePhoto={takePhoto} />} */}
         {/* {
           isReady && (
             <div className="btn-take-photo">
@@ -1005,11 +1005,11 @@ const DefaultCamera = (props) => {
         {isReady && (
           <div className="btn-polly-logo"
             style={{
-              position: 'fixed',
+              position: 'absolute',
               left: '1%',
               top: '2%',
-              height: '11%',
-              width: '14%',
+              height: '100px',
+              width: '185px',
               display: 'flex',
               justifyContent: 'center',
               background: isLogoClicked ? '#5757578c' : 'transparent',
