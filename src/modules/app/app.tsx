@@ -16,6 +16,7 @@ import KeyboardDemo from "../../components/keyboard/keyboard";
 import PollySpeaking from "../../components/defaultCamera/pollySpeaking";
 import ConfirmCode from "../reset-password/components/confirm-code";
 import Setting from "../setting/components/Setting";
+import Home from "../home/components/home";
 
 const Container = styled("div")``;
 
@@ -131,6 +132,17 @@ export const App: React.FC<AppProps> = () => {
           component={() =>
             isAuthorized ? (
               <DefaultCamera />
+            ) : (
+              <Redirect to={routes.onboarding} />
+            )
+          }
+        />
+        <RouterDom.Route
+          path={routes.home}
+          exact
+          component={() =>
+            isAuthorized ? (
+              <Home />
             ) : (
               <Redirect to={routes.onboarding} />
             )

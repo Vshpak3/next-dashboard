@@ -6,5 +6,7 @@ export const routes = {
   signUp: "/sign-up",
   userProfile: "/user-profile",
   setting: "/setting",
-  main: "/",
+  home:"/home",
+  camera:"/camera",
+  main: "/"
 };
