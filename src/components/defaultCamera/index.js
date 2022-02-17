@@ -1099,11 +1099,16 @@ const DefaultCamera = (props) => {
               </div>
             </div>
             <div className="control-take-photo"
-              onClick={() => {
-                takePhoto()
-              }}
+              // onClick={() => {
+              //   takePhoto()
+              // }}
             >
-              <img src={TakePhotoIcon} alt="" />
+              <img src={TakePhotoIcon} onClick={
+                () => {
+                takePhoto()
+                  
+                }
+              } alt="" />
             </div>
             {/* </div> */}
           </div>
