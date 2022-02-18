@@ -10,13 +10,26 @@ const ControlBottom = (props) => {
     takePhoto,
   } = props
   return (
-    <div className="control-bottom">
-      <div className="control-recording"
-        onClick={() => {
-          console.log('RECORD')
-        }}
+    <div className={isTriangleClicked ? "control-bottom active" : "control-bottom"}>
+      {
+        // !isTriangleClicked && (
+        <div className={isTriangleClicked ? "control-recording active" : "control-recording"}
+          onClick={() => {
+            console.log('RECORD')
+          }}
+        >
+          <img src={RecordingIcon} alt="" />
+        </div>
+        // )
+      }
+
+      <div className={isTriangleClicked ? "control-take-photo active" : "control-take-photo"}
       >
-        <img src={RecordingIcon} alt="" />
+        <img src={TakePhotoIcon} onClick={
+          () => {
+            takePhoto()
+          }
+        } alt="" />
       </div>
       <div className="triangle-container"
         onClick={() => {
@@ -27,14 +40,6 @@ const ControlBottom = (props) => {
         </div>
         <div className="control-bold-line">
         </div>
-      </div>
-      <div className="control-take-photo"
-      >
-        <img src={TakePhotoIcon} onClick={
-          () => {
-            takePhoto()
-          }
-        } alt="" />
       </div>
     </div>
   )

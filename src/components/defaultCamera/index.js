@@ -6,7 +6,7 @@ import "@tensorflow/tfjs";
 import "../assets/style.css";
 import "react-simple-keyboard/build/css/index.css";
 import jQuery from "jquery";
-import { withRouter, useHistory, Link } from "react-router-dom";
+import { withRouter, useHistory } from "react-router-dom";
 import Keyboard from "react-simple-keyboard";
 import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
@@ -15,11 +15,6 @@ import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
-import SettingIcon from "../assets/setting.png";
-import HomeIcon from "../assets/home.png";
-import TakePhotoIcon from "../assets/takephoto.png";
-import PhotoIcon from "../assets/photos.png";
-import RecordingIcon from "../assets/recording_polly.png";
 import { pollyLogo } from '../../common/polly-logo'
 
 
@@ -970,19 +965,19 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
-        {(isReady && !isTriangleClicked) && (
+        {(isReady) && (
           <ControlBottom
             setIsTriangleClicked={setIsTriangleClicked}
             isTriangleClicked={isTriangleClicked}
             takePhoto={takePhoto}
           />
         )}
-        {(isReady && isTriangleClicked) && (
+        {/* {(isReady && isTriangleClicked) && (
           <ControlCenter
             setIsTriangleClicked={setIsTriangleClicked}
             isTriangleClicked={isTriangleClicked}
           />
-        )}
+        )} */}
       </Container>
     </React.Fragment>
   );
