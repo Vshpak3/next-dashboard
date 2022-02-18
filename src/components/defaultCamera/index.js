@@ -953,18 +953,22 @@ const DefaultCamera = (props) => {
             setIsLogoClicked={setIsLogoClicked}
           />
         )}
-        {(isReady && isLogoClicked) && (
+        {(isReady) && (
           <SideBarHome
+            isLogoClicked={isLogoClicked}
             vidOff={vidOff}
           />
         )}
-        {(isReady && isLogoClicked) && (
+        {(isReady) && (
           <SideBarSetting
+            isLogoClicked={isLogoClicked}
             vidOff={vidOff}
           />
         )}
-        {(isReady && isLogoClicked) && (
-          <SideBarImages />
+        {(isReady) && (
+          <SideBarImages
+            isLogoClicked={isLogoClicked}
+          />
         )}
         {(isReady && !isTriangleClicked) && (
           <ControlBottom
@@ -974,9 +978,9 @@ const DefaultCamera = (props) => {
           />
         )}
         {(isReady && isTriangleClicked) && (
-          <ControlCenter 
-          setIsTriangleClicked={setIsTriangleClicked}
-          isTriangleClicked={isTriangleClicked}
+          <ControlCenter
+            setIsTriangleClicked={setIsTriangleClicked}
+            isTriangleClicked={isTriangleClicked}
           />
         )}
       </Container>

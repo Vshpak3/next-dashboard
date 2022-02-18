@@ -455,9 +455,9 @@
   display: flex;
   justify-content: center;
 }
-.btn-setting div {
+.btn-setting {
   position: fixed;
-  left: -5px;
+  left: -100%;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -469,13 +469,18 @@
   border: 1px solid #ffffff;
   cursor: pointer;
   z-index: 1;
+  transition: 750ms;
 }
 .btn-setting img {
   width: 70%;
 }
-.btn-home div {
+.btn-setting.active {
+  left: 0;
+  transition: 350ms;
+}
+.btn-home {
   position: fixed;
-  left: -5px;
+  left: -100%;
   top: 30%;
   transform: translateY(-50%);
   display: flex;
@@ -487,13 +492,18 @@
   border: 1px solid #ffffff;
   cursor: pointer;
   z-index: 1;
+  transition: 750ms;
+}
+.btn-home.active {
+  left: 0;
+  transition: 350ms;
 }
 .btn-home img {
   width: 70%;
 }
-.btn-images div {
+.btn-images {
   position: fixed;
-  left: -5px;
+  left: -100%;
   top: 70%;
   transform: translateY(-50%);
   display: flex;
@@ -505,9 +515,14 @@
   border: 1px solid #ffffff;
   cursor: pointer;
   z-index: 1;
+  transition: 750ms;
 }
 .btn-images img {
   width: 70%;
+}
+.btn-images.active {
+  left: 0;
+  transition: 350ms;
 }
 .control-bottom {
   position: fixed;

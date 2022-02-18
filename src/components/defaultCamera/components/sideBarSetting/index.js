@@ -9,11 +9,12 @@ import SettingIcon from "../../../assets/setting.png";
 const SideBarSetting = (props) => {
   const {
     vidOff,
+    isLogoClicked
   } = props
   const history = useHistory();
 
   return (
-    <div className="btn-setting">
+    <div className={isLogoClicked ? "btn-setting active" : "btn-setting"}>
       <div
         onClick={() => {
           vidOff();

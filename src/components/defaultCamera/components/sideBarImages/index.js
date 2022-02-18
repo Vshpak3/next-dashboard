@@ -8,11 +8,12 @@ import { useHistory } from "react-router-dom";
 const SideBarImages = (props) => {
   const {
     // vidOff,
+    isLogoClicked
   } = props
   // const history = useHistory();
 
   return (
-    <div className="btn-images">
+    <div className={isLogoClicked ? "btn-images active" : "btn-images"}>
       <div>
         <img src={PhotoIcon} alt="" />
       </div>
