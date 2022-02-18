@@ -11,10 +11,6 @@ import Keyboard from "react-simple-keyboard";
 import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
-import Top from "../assets/top.png";
-import Bottom from "../assets/bottom.png";
-import FastLeft from "../assets/fast-left.png";
-import FastRight from "../assets/fast-right.png";
 import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
@@ -24,9 +20,6 @@ import HomeIcon from "../assets/home.png";
 import TakePhotoIcon from "../assets/takephoto.png";
 import PhotoIcon from "../assets/photos.png";
 import RecordingIcon from "../assets/recording_polly.png";
-import CameraControll from "../assets/camera.png";
-// import { LogoIcon } from "../../../common/logo-icon";
-// import { LogoIcon } from "../../common/logo-icon";
 import { pollyLogo } from '../../common/polly-logo'
 
 
@@ -34,8 +27,15 @@ import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
 import useControlCamera from "../camera/useControlCamera";
-import Footer from "./footer";
-import { routes } from "../../modules/app/contants";
+import {
+  ControlHardware,
+  PollyLogo,
+  SideBarHome,
+  SideBarSetting,
+  SideBarImages,
+  ControlBottom,
+  ControlCenter
+} from './components'
 
 const remote = window.require("electron").remote;
 
@@ -935,184 +935,49 @@ const DefaultCamera = (props) => {
           />
         )}
         {(isReady && !isTriangleClicked) && (
-          <div className="control-hardware">
-            {
-              isLogoClicked ?
-                (
-                  <div className="fast-left"></div>
-                )
-                : (
-                  <div
-                    className="fast-left"
-                    onMouseDown={() => mouseOverFastLeft()}
-                    onMouseUp={() => stop()}
-                  >
-                    <img src={FastLeft} alt="" />
-                  </div>
-                )
-            }
-            <div
-              className="slow-left"
-              onMouseDown={() => mouseOverSlowLeft()}
-              onMouseUp={() => stop()}
-            >
-              <img src={Back} alt="" />
-            </div>
-            <div className="center">
-              <div
-                className="top"
-                onMouseDown={() => mouseOverTop()}
-                onMouseUp={() => stop()}
-              >
-                <img src={Top} alt="" />
-              </div>
-              <div
-                // className="bottom"
-                onMouseDown={() => mouseOverBottom()}
-                onMouseUp={() => stop()}
-              >
-                <img src={Bottom} alt="" />
-              </div>
-            </div>
-            <div
-              className="slow-right"
-              onMouseDown={() => mouseOverSlowRight()}
-              onMouseUp={() => stop()}
-            >
-              <img src={Next} alt="" />
-            </div>
-            <div
-              className="fast-right"
-              onMouseDown={() => mouseOverFastRight()}
-              onMouseUp={() => stop()}
-            >
-              <img src={FastRight} alt="" />
-            </div>
-          </div>
+          <ControlHardware
+            mouseOverTop={mouseOverTop}
+            mouseOverSlowRight={mouseOverSlowRight}
+            mouseOverSlowLeft={mouseOverSlowLeft}
+            mouseOverFastRight={mouseOverFastRight}
+            mouseOverFastLeft={mouseOverFastLeft}
+            mouseOverBottom={mouseOverBottom}
+            stop={stop}
+            isLogoClicked={isLogoClicked}
+          />
         )}
         {isReady && (
-          <div className="btn-polly-logo"
-            style={{
-              position: 'absolute',
-              left: '1%',
-              top: '2%',
-              height: '100px',
-              width: '185px',
-              display: 'flex',
-              justifyContent: 'center',
-              background: isLogoClicked ? '#5757578c' : 'transparent',
-              borderRadius: '30px',
-              padding: '20px 40px 20px 50px',
-              cursor: 'pointer',
-              zIndex: 1
-            }}
-          >
-            <div
-
-              onClick={() => {
-                setIsLogoClicked(!isLogoClicked)
-              }}
-            >
-              <img src={pollyLogo} alt="" />
-              {/* <div id='polly' style={
-                {
-                  width: '175px',
-                  top: '50%',
-                  left: '5%',
-                }
-              }> */}
-              {/* <LogoIcon /> */}
-              {/* </div> */}
-              {/* <LogoIconWrapper>
-              </LogoIconWrapper> */}
-            </div>
-          </div>
+          <PollyLogo
+            isLogoClicked={isLogoClicked}
+            pollyLogo={pollyLogo}
+            setIsLogoClicked={setIsLogoClicked}
+          />
         )}
         {(isReady && isLogoClicked) && (
-          <div className="btn-home">
-            <div
-
-              onClick={() => {
-                vidOff();
-                history.push(routes.home);
-              }}
-            >
-              <img src={HomeIcon} alt="" />
-            </div>
-          </div>
+          <SideBarHome
+            vidOff={vidOff}
+          />
         )}
         {(isReady && isLogoClicked) && (
-          <div className="btn-setting">
-            <div
-
-              onClick={() => {
-                vidOff();
-                history.push(routes.setting);
-              }}
-            >
-              <img src={SettingIcon} alt="" />
-            </div>
-          </div>
+          <SideBarSetting
+            vidOff={vidOff}
+          />
         )}
         {(isReady && isLogoClicked) && (
-          <div className="btn-images">
-            <div>
-              <img src={PhotoIcon} alt="" />
-            </div>
-          </div>
+          <SideBarImages />
         )}
         {(isReady && !isTriangleClicked) && (
-          <div className="control-bottom">
-            {/* <div className="btn-test"> */}
-            <div className="control-recording"
-              onClick={() => {
-                console.log('RECORD')
-              }}
-            >
-              <img src={RecordingIcon} alt="" />
-            </div>
-            <div className="triangle-container"
-              onClick={() => {
-                setIsTriangleClicked(!isTriangleClicked)
-              }}
-            >
-              <div className="control-triangle">
-                {/* <img src={HomeIcon} alt="" /> */}
-              </div>
-              <div className="control-bold-line">
-                {/* <img src={HomeIcon} alt="" /> */}
-              </div>
-            </div>
-            <div className="control-take-photo"
-              // onClick={() => {
-              //   takePhoto()
-              // }}
-            >
-              <img src={TakePhotoIcon} onClick={
-                () => {
-                takePhoto()
-                  
-                }
-              } alt="" />
-            </div>
-            {/* </div> */}
-          </div>
+          <ControlBottom
+            setIsTriangleClicked={setIsTriangleClicked}
+            isTriangleClicked={isTriangleClicked}
+            takePhoto={takePhoto}
+          />
         )}
         {(isReady && isTriangleClicked) && (
-          <div className="control-center">
-            <div className="triangle-container-center"
-              onClick={() => {
-                setIsTriangleClicked(!isTriangleClicked)
-              }}
-            >
-              <div className="control-bold-line-top">
-                {/* <img src={HomeIcon} alt="" /> */}
-              </div>
-              <div className="control-triangle-down">
-                {/* <img src={HomeIcon} alt="" /> */}
-              </div>
-            </div>
-          </div>
+          <ControlCenter 
+          setIsTriangleClicked={setIsTriangleClicked}
+          isTriangleClicked={isTriangleClicked}
+          />
         )}
       </Container>
     </React.Fragment>
