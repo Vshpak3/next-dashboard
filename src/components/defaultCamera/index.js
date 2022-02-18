@@ -990,21 +990,6 @@ const DefaultCamera = (props) => {
             </div>
           </div>
         )}
-        {/* {isReady && <Footer takePhoto={takePhoto} />} */}
-        {/* {
-          isReady && (
-            <div className="btn-take-photo">
-              <ImageWrapper>
-                <ImageNavigate
-                  src={CameraControll}
-                  alt=""
-                  onClick={takePhoto}
-                  className="button_click_cursor"
-                />
-              </ImageWrapper>
-            </div>
-          )
-        } */}
         {isReady && (
           <div className="btn-polly-logo"
             style={{
