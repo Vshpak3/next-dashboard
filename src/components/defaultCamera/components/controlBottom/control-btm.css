@@ -1,0 +1,170 @@
+.input-config {
+  position: absolute;
+  display: none;
+}
+.control-menu {
+  margin: 0 auto;
+  position: absolute;
+  top: 65%;
+  left:50%;
+  margin-left: -25px;
+  margin-right: -25px;
+  transition: 500ms;
+}
+.control-menu.active {
+  margin: 0 auto;
+  position: absolute;
+  top: 25%;
+  left:50%;
+  margin-left: -25px;
+  margin-right: -25px;
+  transition: 500ms;
+}
+
+.control-btn {
+  width: 80px;
+  height: 180px;
+  border-radius: 70px;
+  position: absolute;
+  overflow: hidden;
+  cursor :pointer;
+}
+
+.circular {
+  background: #5757578c;
+  border: oldlace;
+}
+.control-btn:hover .md-36{
+  color: red;
+}
+
+.control-btn {
+  background: rgba(255,255,255,0,2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s cubic-bezier(0.25 , 0.8 ,0.25 , 1);
+}
+
+.control-btn:not(:first-child){
+  opacity: 0;
+  z-index: 2;
+  transition: all .3s cubic-bezier(0.87 , -.41 ,0.19 , 1);
+}
+
+.control-btn:nth-child(2) {
+  /* top:0;
+  transition-delay: 0s; */
+  display: none;
+}
+.control-btn:nth-child(3) {
+  top:0;
+  left: 0;
+  transition-delay: 0.1s;
+}
+.control-btn:nth-child(4) {
+  top:0;
+  transition-delay: 0.1s;
+}
+.control-btn:nth-child(5) {
+  top:0;
+  left: 0;
+  transition-delay: 0.1s;
+}
+.control-btn:nth-child(6) {
+  /* top:0;
+  transition-delay: 0.1s; */
+  display: none;
+}
+.control-btn:nth-child(7) {
+  top:0;
+  left: 0;
+  transition-delay: 0.1s;
+}
+.control-btn:nth-child(8) {
+  left:0;
+  transition-delay: 0.1s;
+}
+
+.control-btn:nth-child(9) {
+  top:0;
+  left:0;
+  transition-delay: 0.1s;
+}
+
+
+
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(2) {
+  /* top:-150px;
+  opacity: 1; */
+  display: none;
+}
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(3) {
+  top:-60px;
+  left: 100px;
+  opacity: 1;
+  height:80px
+}
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(4) {
+  left:150px;
+  top: 60px;
+  opacity: 1;
+  height:80px
+}
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(5) {
+  top:170px;
+  left: 100px;
+  opacity: 1;
+  height:80px
+}
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(6) {
+  /* top:150px;
+  opacity: 1;
+  height:80px */
+  display: none;
+}
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(7) {
+  top:170px;
+  left: -100px;
+  opacity: 1;
+  height:80px
+}
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(8) {
+  left:-150px;
+  top: 60px;
+  opacity: 1;
+  height:80px
+}
+
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(9) {
+  top: -60px;;
+  left: -100px;
+  opacity: 1;
+  height:80px
+}
+
+.triangle-container,
+.triangle-container-down {
+  position: absolute;
+  transition: all 0.3s ease
+}
+
+.triangle-container-down {
+  transform: translateY(50px);
+  /* opacity: 0; */
+}
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn .triangle-container {
+  /* transform: translateY(-50px); */
+  transform: rotate(180deg);
+  /* opacity: 1; */
+}
+.input-config#control-toggle:checked ~ #show-control-menu .control-btn .triangle-container-down {
+  /* transform: translateY(0); */
+  transform: rotate(180deg);
+  /* opacity: 1; */
+}

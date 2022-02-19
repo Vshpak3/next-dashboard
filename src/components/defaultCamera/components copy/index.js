@@ -1,6 +1,0 @@
-export { default as ControlHardware } from './controlHardware'
-export { default as PollyLogo } from './polloyLogo'
-export { default as SideBarHome } from './sideBarHome'
-export { default as SideBarSetting } from './sideBarSetting'
-export { default as SideBarImages } from './sideBarImages'
-export { default as ControlBottom } from './controlBottom'
