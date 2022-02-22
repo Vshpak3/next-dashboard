@@ -1,8 +1,17 @@
 import React from 'react'
 import "../../../assets/style.css"
+import WifiIcon from "../../../assets/wifi.png";
+import SpeechTextIcon from "../../../assets/speechtext_new.png";
+import FlashLightIcon from "../../../assets/flashlight.png";
+import LazerIcon from "../../../assets/lazer.png";
+import OnFrontCamera from "../../../assets/onfrontcamera.png";
 import RecordingIcon from "../../../assets/recording_polly.png";
 import TakePhotoIcon from "../../../assets/takephoto.png";
+import FocusIcon from "../../../assets/focus_new.png";
 import "./control-btm.css"
+
+
+
 const ControlBottom = (props) => {
   const {
     setIsTriangleClicked,
@@ -50,15 +59,27 @@ const ControlBottom = (props) => {
 
         <div className='control-btn circular' ><i>1 </i></div>
 
-        <div className='control-btn circular' onClick={() => console.log('')}><i>2 </i></div>
-        <div className='control-btn circular'><i>3 </i></div>
-        <div className='control-btn circular'><i>4 </i></div>
+        <div className='control-btn circular' onClick={() => console.log('')}>
+          <img src={OnFrontCamera} alt="" />
+        </div>
+        <div className='control-btn circular'>
+          <img src={LazerIcon} alt="" />
+        </div>
+        <div className='control-btn circular'>
+          <img src={FlashLightIcon} alt="" />
+        </div>
 
         <div className='control-btn circular'><i>5 </i></div>
 
-        <div className='control-btn circular'><i>6 </i></div>
-        <div className='control-btn circular'><i>7 </i></div>
-        <div className='control-btn circular'><i>8 </i></div>
+        <div className='control-btn circular'>
+          <img src={WifiIcon} alt="" />
+        </div>
+        <div className='control-btn circular'>
+          <img src={SpeechTextIcon} alt="" />
+        </div>
+        <div className='control-btn circular'>
+        <img src={FocusIcon} alt="" />
+        </div>
         {/* <div className='control-btn' ><i>11 </i></div> */}
         {/* </label> */}
       </div>

@@ -163,6 +163,35 @@
   height:80px;
   z-index: 1;
 }
+.control-menu .control-btn:nth-child(2):hover {
+  background: #ED157F;
+}
+
+.control-menu.active .control-btn:nth-child(3):hover {
+  background: #ED157F;
+}
+.control-menu.active .control-btn:nth-child(4):hover {
+  background: #ED157F;
+}
+.control-menu.active .control-btn:nth-child(5):hover {
+  background: #ED157F;
+}
+
+.control-menu.active .control-btn:nth-child(6):hover {
+  background: #ED157F;
+}
+
+.control-menu.active .control-btn:nth-child(7):hover {
+  background: #ED157F;
+}
+
+.control-menu.active .control-btn:nth-child(8):hover {
+  background: #ED157F;
+}
+
+.control-menu.active .control-btn:nth-child(9):hover {
+  background: #ED157F;
+}
 
 .triangle-container,
 .triangle-container-down {
