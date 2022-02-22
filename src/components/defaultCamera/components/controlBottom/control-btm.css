@@ -32,7 +32,7 @@
 
 .circular {
   background: #5757578c;
-  border: oldlace;
+  border: 1px solid #ffffff;
 }
 .control-btn:hover .md-36{
   color: red;
