@@ -573,9 +573,9 @@
 }
 .triangle-container {
   background: #5757578c;
-  padding: 25px;
+  padding: 40px;
   border-radius: 100%;
-  height: 80px;
+  height: 115px;
   border: 1px solid #ffffff;
   position: fixed;
 }

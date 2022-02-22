@@ -33,6 +33,7 @@
 .circular {
   background: #5757578c;
   border: 1px solid #ffffff;
+  padding: 55px;
 }
 .control-btn:hover .md-36{
   color: red;
@@ -110,21 +111,21 @@
 }
 
 .control-menu.active .control-btn:nth-child(3) {
-  top:-60px;
+  top:-150px;
   left: 100px;
   opacity: 1;
   height:80px;
   z-index: 1;
 }
 .control-menu.active .control-btn:nth-child(4) {
-  left:150px;
-  top: 60px;
+  left:200px;
+  top: 40px;
   opacity: 1;
   height:80px;
   z-index: 1;
 }
 .control-menu.active .control-btn:nth-child(5) {
-  top:170px;
+  top:250px;
   left: 100px;
   opacity: 1;
   height:80px;
@@ -140,15 +141,15 @@
 }
 
 .control-menu.active .control-btn:nth-child(7) {
-  top:170px;
-  left: -100px;
+  top:250px;
+  left: -120px;
   opacity: 1;
   height:80px;
   z-index: 1;
 }
 
 .control-menu.active .control-btn:nth-child(8) {
-  left:-150px;
+  left:-235px;
   top: 60px;
   opacity: 1;
   height:80px;
@@ -156,8 +157,8 @@
 }
 
 .control-menu.active .control-btn:nth-child(9) {
-  top: -60px;;
-  left: -100px;
+  top: -150px;;
+  left: -120px;
   opacity: 1;
   height:80px;
   z-index: 1;
