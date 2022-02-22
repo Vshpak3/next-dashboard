@@ -23,7 +23,7 @@
 
 .control-btn {
   width: 80px;
-  height: 180px;
+  height: 200px;
   border-radius: 70px;
   position: absolute;
   overflow: hidden;
@@ -60,92 +60,107 @@
 .control-btn:nth-child(3) {
   top:0;
   left: 0;
-  transition-delay: 0.1s;
+  z-index: -1;
+  transition-delay: 0s;
 }
 .control-btn:nth-child(4) {
   top:0;
   transition-delay: 0.1s;
+  z-index: -1;
 }
 .control-btn:nth-child(5) {
   top:0;
   left: 0;
-  transition-delay: 0.1s;
+  transition-delay: 0.2s;
+  z-index: -1;
 }
 .control-btn:nth-child(6) {
   /* top:0;
   transition-delay: 0.1s; */
   display: none;
+  z-index: -1;
 }
 .control-btn:nth-child(7) {
   top:0;
   left: 0;
-  transition-delay: 0.1s;
+  transition-delay: 0.3s;
+  z-index: -1;
 }
 .control-btn:nth-child(8) {
   left:0;
-  transition-delay: 0.1s;
+  transition-delay: 0.4s;
+  z-index: -1;
 }
 
 .control-btn:nth-child(9) {
   top:0;
   left:0;
-  transition-delay: 0.1s;
+  transition-delay: 0.5s;
+  z-index: -1;
 }
 
 
 
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(2) {
+.control-menu .control-btn:nth-child(2) {
   /* top:-150px;
   opacity: 1; */
+  z-index: 1;
   display: none;
 }
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(3) {
+.control-menu.active .control-btn:nth-child(3) {
   top:-60px;
   left: 100px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(4) {
+.control-menu.active .control-btn:nth-child(4) {
   left:150px;
   top: 60px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(5) {
+.control-menu.active .control-btn:nth-child(5) {
   top:170px;
   left: 100px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(6) {
+.control-menu.active .control-btn:nth-child(6) {
   /* top:150px;
   opacity: 1;
   height:80px */
   display: none;
+  z-index: 1;
 }
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(7) {
+.control-menu.active .control-btn:nth-child(7) {
   top:170px;
   left: -100px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(8) {
+.control-menu.active .control-btn:nth-child(8) {
   left:-150px;
   top: 60px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
 
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn:nth-child(9) {
+.control-menu.active .control-btn:nth-child(9) {
   top: -60px;;
   left: -100px;
   opacity: 1;
-  height:80px
+  height:80px;
+  z-index: 1;
 }
 
 .triangle-container,
@@ -158,12 +173,12 @@
   transform: translateY(50px);
   /* opacity: 0; */
 }
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn .triangle-container {
+.control-menu.active .control-btn .triangle-container {
   /* transform: translateY(-50px); */
   transform: rotate(180deg);
   /* opacity: 1; */
 }
-.input-config#control-toggle:checked ~ #show-control-menu .control-btn .triangle-container-down {
+.control-menu.active .control-btn .triangle-container-down {
   /* transform: translateY(0); */
   transform: rotate(180deg);
   /* opacity: 1; */
