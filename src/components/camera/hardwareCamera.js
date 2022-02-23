@@ -173,6 +173,11 @@ const HardwareCamera = () => {
       return;
     }
 
+    console.log('write r', globalPort.write("r"));
+
+    globalPort.write("r");
+    globalPort.write("r");
+    globalPort.write("r");
     globalPort.write("r");
   };
 
@@ -181,6 +186,11 @@ const HardwareCamera = () => {
       return;
     }
 
+    console.log('write R', globalPort.write("R"));
+
+    globalPort.write('R');
+    globalPort.write('R');
+    globalPort.write('R');
     globalPort.write('R');
   };
 
@@ -189,6 +199,11 @@ const HardwareCamera = () => {
       return;
     }
 
+    console.log('write l', globalPort.write("l"));
+    
+    globalPort.write("l");
+    globalPort.write("l");
+    globalPort.write("l");
     globalPort.write("l");
   };
 
@@ -197,6 +212,11 @@ const HardwareCamera = () => {
       return;
     }
 
+    console.log('write L', globalPort.write("L"));
+
+    globalPort.write("L");
+    globalPort.write("L");
+    globalPort.write("L");
     globalPort.write("L");
   };
 
@@ -230,7 +250,8 @@ const HardwareCamera = () => {
     FastPanLeft,
     FastPanRight,
     TiltDown,
-    TiltUp
+    TiltUp,
+    globalPort
   };
 };
 export default HardwareCamera;

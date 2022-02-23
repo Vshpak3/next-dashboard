@@ -9,8 +9,11 @@ const useControlCamera = () => {
     TiltDown,
     // AdjustSpeed,
     TiltUp,
+    globalPort
     // Stop,
   } = HardwareCamera();
+
+  console.log('glbp', globalPort)
 
   const mouseOverFastRight = () => {
     console.log("fast-right");
