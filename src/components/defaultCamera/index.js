@@ -29,7 +29,6 @@ import {
   SideBarSetting,
   SideBarImages,
   ControlBottom,
-  ControlCenter
 } from './components'
 
 const remote = window.require("electron").remote;
@@ -972,12 +971,6 @@ const DefaultCamera = (props) => {
             takePhoto={takePhoto}
           />
         )}
-        {/* {(isReady && isTriangleClicked) && (
-          <ControlCenter
-            setIsTriangleClicked={setIsTriangleClicked}
-            isTriangleClicked={isTriangleClicked}
-          />
-        )} */}
       </Container>
     </React.Fragment>
   );

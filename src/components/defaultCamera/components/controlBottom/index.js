@@ -21,7 +21,6 @@ const ControlBottom = (props) => {
   return (
     <><div className={isTriangleClicked ? "control-bottom active" : "control-bottom"}>
       {
-        // !isTriangleClicked && (
         <div className={isTriangleClicked ? "control-recording active" : "control-recording"}
           onClick={() => {
             console.log('RECORD');
@@ -29,7 +28,6 @@ const ControlBottom = (props) => {
         >
           <img src={RecordingIcon} alt="" />
         </div>
-        // )
       }
 
       <div className={isTriangleClicked ? "control-take-photo active" : "control-take-photo"}
@@ -50,38 +48,56 @@ const ControlBottom = (props) => {
       </div>
     </div>
       <div className={isTriangleClicked ? "control-menu active" : 'control-menu'}>
-        {/* <input className='input-config' type='checkbox' id='control-toggle' checked={isTriangleClicked} onClick={() => {
-          setIsTriangleClicked(!isTriangleClicked);
-        } } /> */}
-        {/* <label for={"control-toggle"} id="show-control-menu"> */}
         <div className={'control-btn'}>
         </div>
 
+        {
+          // @ dont remove this
+        }
         <div className='control-btn circular' ><i>1 </i></div>
+        {
+          // @ dont remove this
+        }
 
-        <div className='control-btn circular' onClick={() => console.log('')}>
+        <div className='control-btn circular'
+          onClick={() => console.log('OnFrontCamera')}
+        >
           <img src={OnFrontCamera} alt="" />
         </div>
-        <div className='control-btn circular'>
+        <div className='control-btn circular'
+          onClick={() => console.log('onLazerIcon')}
+        >
           <img src={LazerIcon} alt="" />
         </div>
-        <div className='control-btn circular'>
+        <div className='control-btn circular'
+          onClick={() => console.log('FlashLightICon')}
+        >
           <img src={FlashLightIcon} alt="" />
         </div>
 
-        <div className='control-btn circular'><i>5 </i></div>
+        {
+          // @ dont remove this
+        }
+        <div className='control-btn circular'><i>5</i></div>
+        {
+          // @ dont remove this
+        }
 
-        <div className='control-btn circular'>
+        <div className='control-btn circular'
+          onClick={() => console.log('WifiIcon')}
+        >
           <img src={WifiIcon} alt="" />
         </div>
-        <div className='control-btn circular'>
+        <div className='control-btn circular'
+          onClick={() => console.log('SpeechTextIcon')}
+        >
           <img src={SpeechTextIcon} alt="" />
         </div>
-        <div className='control-btn circular'>
-        <img src={FocusIcon} alt="" />
+        <div className='control-btn circular'
+          onClick={() => console.log('FocusIcon')}
+        >
+          <img src={FocusIcon} alt="" />
         </div>
-        {/* <div className='control-btn' ><i>11 </i></div> */}
-        {/* </label> */}
       </div>
     </>
   )
