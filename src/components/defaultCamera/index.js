@@ -8,7 +8,6 @@ import "react-simple-keyboard/build/css/index.css";
 import jQuery from "jquery";
 import { withRouter, useHistory } from "react-router-dom";
 import Keyboard from "react-simple-keyboard";
-import LockImg from "../assets/lock.png";
 import Back from "../assets/back.png";
 import Next from "../assets/next.png";
 import Spinner from "../assets/Spinner.gif";
@@ -29,6 +28,9 @@ import {
   SideBarSetting,
   SideBarImages,
   ControlBottom,
+  LoaderPollyLogo,
+  LoaderStartDetecting,
+  StartDetecting
 } from './components'
 
 const remote = window.require("electron").remote;
@@ -181,6 +183,9 @@ const DefaultCamera = (props) => {
   const [inputKeyboard, setInputKeyboard] = useState("");
   const [isLogoClicked, setIsLogoClicked] = useState(false);
   const [isTriangleClicked, setIsTriangleClicked] = useState(false);
+  const [isStartDetecting, setStartDetecting] = useState(false)
+  const [loadingOnDetecting, setloadingOnDetecting] = useState(false)
+  const [lockIcon , setIconLock] = useState(false)
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -211,6 +216,12 @@ const DefaultCamera = (props) => {
   useEffect(() => {
     init();
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setloadingOnDetecting(false)
+    } , 1500)
+  }, [loadingOnDetecting])
 
   const init = async () => {
     await getDeviceList();
@@ -881,44 +892,51 @@ const DefaultCamera = (props) => {
               </div>
             )}
             <div className="d-flex w-100">
-              <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
-                {data.length > 3 && <img src={Back} alt="back" />}
-              </Navigate>
-              <ListPredictions id={"listPredictions"}>
-                {data.length > 0 &&
-                  data.map((item, index) => (
-                    <ItemPredictions
-                      className={
-                        currentChoice != null &&
-                          item.bbox[0] === currentChoice.bbox[0]
-                          ? "active"
-                          : ""
-                      }
-                      key={index}
-                      onClick={() => choiceObject(item)}
-                    >
-                      <span>{item.class}</span>
-                    </ItemPredictions>
-                  ))}
-              </ListPredictions>
-              <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
-                {data.length > 3 && <img src={Next} alt="next" />}
-              </Navigate>
+              {
+                isStartDetecting && (
+                  <div>
+                    <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
+                      {data.length > 3 && <img src={Back} alt="back" />}
+                    </Navigate>
+                    <ListPredictions id={"listPredictions"}>
+                      {data.length > 0 &&
+                        data.map((item, index) => (
+                          <ItemPredictions
+                            className={
+                              currentChoice != null &&
+                                item.bbox[0] === currentChoice.bbox[0]
+                                ? "active"
+                                : ""
+                            }
+                            key={index}
+                            onClick={() => choiceObject(item)}
+                          >
+                            <span>{item.class}</span>
+                          </ItemPredictions>
+                        ))}
+                    </ListPredictions>
+                    <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
+                      {data.length > 3 && <img src={Next} alt="next" />}
+                    </Navigate>
+                  </div>
+                )
+              }
             </div>
           </Predictions>
         </Row>
         {!isReady && (
           <div
-            className="pending-load"
+            className="starting-load-polly"
             style={{ width: screenwidth, height: screenheight }}
           >
-            <div className="start-detecting">
-              <img src={LockImg} className="mr-3" alt="lock" />
-              <span className="mr-3">Start detecting</span>
-              <img src={Spinner} alt="" />
-            </div>
+            <LoaderPollyLogo pollyLogo={pollyLogo} />
           </div>
         )}
+        {
+          (isReady && loadingOnDetecting) && (
+            <LoaderStartDetecting />
+          )
+        }
         {isOpenKeyboard && (
           <Keyboard
             // keyboardRef={(r) => onChange(r)}
@@ -928,7 +946,7 @@ const DefaultCamera = (props) => {
             value={inputKeyboard}
           />
         )}
-        {(isReady && !isTriangleClicked) && (
+        {(isReady && !lockIcon && !isStartDetecting && !isTriangleClicked) && (
           <ControlHardware
             mouseOverTop={mouseOverTop}
             mouseOverSlowRight={mouseOverSlowRight}
@@ -940,34 +958,50 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
-        {isReady && (
+        {(isReady  && !lockIcon && !isStartDetecting) && (
           <PollyLogo
             isLogoClicked={isLogoClicked}
             pollyLogo={pollyLogo}
             setIsLogoClicked={setIsLogoClicked}
           />
         )}
-        {(isReady) && (
+        {(isReady && isStartDetecting) && (
+          <StartDetecting
+            isLogoClicked={isLogoClicked}
+            pollyLogo={pollyLogo}
+            setIsLogoClicked={setIsLogoClicked}
+            setIconLock={setIconLock}
+            lockIcon={lockIcon}
+            setStartDetecting={setStartDetecting}
+            isStartDetecting={isStartDetecting}
+          />
+        )}
+        {(isReady && !lockIcon && !isStartDetecting) && (
           <SideBarHome
             isLogoClicked={isLogoClicked}
             vidOff={vidOff}
           />
         )}
-        {(isReady) && (
+        {(isReady && !lockIcon && !isStartDetecting) && (
           <SideBarSetting
             isLogoClicked={isLogoClicked}
             vidOff={vidOff}
           />
         )}
-        {(isReady) && (
+        {(isReady && !lockIcon && !isStartDetecting) && (
           <SideBarImages
             isLogoClicked={isLogoClicked}
           />
         )}
-        {(isReady) && (
+        {(isReady && !lockIcon) && (
           <ControlBottom
             setIsTriangleClicked={setIsTriangleClicked}
+            setStartDetecting={setStartDetecting}
+            setloadingOnDetecting={setloadingOnDetecting}
+            isStartDetecting={isStartDetecting}
             isTriangleClicked={isTriangleClicked}
+            setIconLock={setIconLock}
+            lockIcon={lockIcon}
             takePhoto={takePhoto}
           />
         )}

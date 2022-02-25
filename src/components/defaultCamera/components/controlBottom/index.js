@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import "../../../assets/style.css"
 import WifiIcon from "../../../assets/wifi.png";
 import SpeechTextIcon from "../../../assets/speechtext_new.png";
@@ -9,7 +9,8 @@ import RecordingIcon from "../../../assets/recording_polly.png";
 import TakePhotoIcon from "../../../assets/takephoto.png";
 import FocusIcon from "../../../assets/focus_new.png";
 import "./control-btm.css"
-
+import StartDetecting from "../../../assets/onfrontcamera.png";
+import Unlock from "../../../assets/unlock.png";
 
 
 const ControlBottom = (props) => {
@@ -17,7 +18,60 @@ const ControlBottom = (props) => {
     setIsTriangleClicked,
     isTriangleClicked,
     takePhoto,
+    setStartDetecting,
+    isStartDetecting,
+    setloadingOnDetecting,
+    lockIcon,
+    setIconLock
   } = props
+
+
+  const isTriangleRenderer = () => {
+    console.log({lockIcon , isStartDetecting})
+    if (!lockIcon && isStartDetecting) {
+      return (
+        <div className="triangle-container"
+        style={{
+          width:'120px'
+        }}
+          onClick={() => {
+            setIsTriangleClicked(!isTriangleClicked);
+            setStartDetecting(false)
+            setIconLock(false)
+          }}
+        >
+          <div
+            style={
+              {
+                position: 'fixed',
+                top: '71%',
+                left: '47.5%',
+              }
+            }
+          >
+            <img src={StartDetecting} alt="" />
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="triangle-container"
+        onClick={() => {
+          setIsTriangleClicked(!isTriangleClicked);
+        }}
+      >
+        <div>
+          <div className="control-triangle">
+          </div>
+          <div className="control-bold-line">
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+
   return (
     <><div className={isTriangleClicked ? "control-bottom active" : "control-bottom"}>
       {
@@ -36,16 +90,7 @@ const ControlBottom = (props) => {
           takePhoto();
         }} alt="" />
       </div>
-      <div className="triangle-container"
-        onClick={() => {
-          setIsTriangleClicked(!isTriangleClicked);
-        }}
-      >
-        <div className="control-triangle">
-        </div>
-        <div className="control-bold-line">
-        </div>
-      </div>
+      {isTriangleRenderer()}
     </div>
       <div className={isTriangleClicked ? "control-menu active" : 'control-menu'}>
         <div className={'control-btn'}>
@@ -60,7 +105,12 @@ const ControlBottom = (props) => {
         }
 
         <div className='control-btn circular'
-          onClick={() => console.log('OnFrontCamera')}
+          onClick={() => {
+            setIsTriangleClicked(false)
+            setStartDetecting(true)
+            setIconLock(true)
+            setloadingOnDetecting(true)
+          }}
         >
           <img src={OnFrontCamera} alt="" />
         </div>
