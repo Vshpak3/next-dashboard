@@ -958,6 +958,18 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
+        {(isReady && !lockIcon && isStartDetecting) && (
+          <ControlHardware
+            mouseOverTop={mouseOverTop}
+            mouseOverSlowRight={mouseOverSlowRight}
+            mouseOverSlowLeft={mouseOverSlowLeft}
+            mouseOverFastRight={mouseOverFastRight}
+            mouseOverFastLeft={mouseOverFastLeft}
+            mouseOverBottom={mouseOverBottom}
+            stop={stop}
+            isLogoClicked={isLogoClicked}
+          />
+        )}
         {(isReady  && !lockIcon && !isStartDetecting) && (
           <PollyLogo
             isLogoClicked={isLogoClicked}

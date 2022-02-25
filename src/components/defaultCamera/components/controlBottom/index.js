@@ -43,9 +43,9 @@ const ControlBottom = (props) => {
           <div
             style={
               {
-                position: 'fixed',
-                top: '71%',
-                left: '47.5%',
+                position: 'absolute',
+                top: '15%',
+                left: '15%',
               }
             }
           >
