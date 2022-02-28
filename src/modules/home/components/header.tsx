@@ -24,6 +24,7 @@ import { ImExit } from "react-icons/im";
 import "react-pro-sidebar/dist/css/styles.css";
 import "../components/css/header.css";
 import { routes } from "../../app/contants";
+import { pollyLogo } from "../../../common/polly-logo";
 
 
 const Header: React.FC<any> = () => {
@@ -45,7 +46,13 @@ const Header: React.FC<any> = () => {
           <SidebarHeader>
             <div className="logotext">
               {/* small and big change using menucollapse state */}
-              <p>{menuCollapse ? "Logo" : "Big Logo"}</p>
+              {/* <p>{menuCollapse ? "Logo" : "Big Logo"}</p> */}
+
+              <img style={{
+                width: '120px',
+                padding: '15px',
+                marginLeft: '75px'
+              }} src={pollyLogo} alt="" />
             </div>
             {/* <div className="closemenu" onClick={menuIconClick}> */}
             {/* changing menu collapse icon on click */}
