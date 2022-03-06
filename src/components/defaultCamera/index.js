@@ -186,6 +186,8 @@ const DefaultCamera = (props) => {
   const [isStartDetecting, setStartDetecting] = useState(false)
   const [loadingOnDetecting, setloadingOnDetecting] = useState(false)
   const [lockIcon , setIconLock] = useState(false)
+  const [flashlight , setFlashlight] = useState(false)
+  const [laserHandler , setLaserHandler] = useState(false)
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -210,6 +212,8 @@ const DefaultCamera = (props) => {
     mouseOverFastRight,
     mouseOverFastLeft,
     mouseOverBottom,
+    onFlashLight,
+    onLaser,
     stop,
   } = useControlCamera();
 
@@ -1010,8 +1014,14 @@ const DefaultCamera = (props) => {
             setIsTriangleClicked={setIsTriangleClicked}
             setStartDetecting={setStartDetecting}
             setloadingOnDetecting={setloadingOnDetecting}
+            setFlashlight={setFlashlight}
+            setLaserHandler={setLaserHandler}
+            onFlashLight={onFlashLight}
+            onLaser={onLaser}
             isStartDetecting={isStartDetecting}
             isTriangleClicked={isTriangleClicked}
+            flashlight={flashlight}
+            laserHandler={laserHandler}
             setIconLock={setIconLock}
             lockIcon={lockIcon}
             takePhoto={takePhoto}

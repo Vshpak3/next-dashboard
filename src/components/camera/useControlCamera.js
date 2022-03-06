@@ -7,6 +7,8 @@ const useControlCamera = () => {
     FastPanLeft,
     FastPanRight,
     TiltDown,
+    Laser,
+    FlashLight,
     // AdjustSpeed,
     TiltUp,
     globalPort
@@ -51,6 +53,15 @@ const useControlCamera = () => {
     TiltDown();
   };
 
+  const onLaser = () => {
+    console.log("Lazer")
+    Laser()
+  }
+  const onFlashLight = () => {
+    console.log("Flash Light")
+    FlashLight()
+  }
+
   //console.log("useControlCamera");
 
   return {
@@ -60,6 +71,8 @@ const useControlCamera = () => {
     mouseOverFastRight,
     mouseOverSlowLeft,
     mouseOverSlowRight,
+    onFlashLight,
+    onLaser,
     stop,
   };
 };

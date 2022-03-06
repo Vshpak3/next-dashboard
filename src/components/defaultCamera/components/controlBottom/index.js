@@ -16,24 +16,30 @@ import Unlock from "../../../assets/unlock.png";
 const ControlBottom = (props) => {
   const {
     setIsTriangleClicked,
+    setFlashlight,
+    setLaserHandler,
+    laserHandler,
+    flashlight,
     isTriangleClicked,
     takePhoto,
     setStartDetecting,
     isStartDetecting,
     setloadingOnDetecting,
     lockIcon,
-    setIconLock
+    setIconLock,
+    onFlashLight,
+    onLaser,
   } = props
 
 
   const isTriangleRenderer = () => {
-    console.log({lockIcon , isStartDetecting})
+    console.log({ lockIcon, isStartDetecting })
     if (!lockIcon && isStartDetecting) {
       return (
         <div className="triangle-container"
-        style={{
-          width:'120px'
-        }}
+          style={{
+            width: '120px'
+          }}
           onClick={() => {
             setIsTriangleClicked(!isTriangleClicked);
             setStartDetecting(false)
@@ -54,6 +60,8 @@ const ControlBottom = (props) => {
         </div>
       )
     }
+
+    // if()
 
     return (
       <div className="triangle-container"
@@ -115,14 +123,49 @@ const ControlBottom = (props) => {
           <img src={OnFrontCamera} alt="" />
         </div>
         <div className='control-btn circular'
-          onClick={() => console.log('onLazerIcon')}
+          onClick={() => {
+            setIsTriangleClicked(false)
+            setLaserHandler(!laserHandler)
+            onLaser()
+            // setStartDetecting(true)
+          }}
         >
-          <img src={LazerIcon} alt="" />
+          {
+            laserHandler ? (
+              <div
+                style={{
+                  background: 'radial-gradient(red, transparent)',
+                  padding: '35px'
+                }}
+              >
+                <img src={LazerIcon} alt="" />
+              </div>
+            ) : <img src={LazerIcon} alt="" />
+          }
+
         </div>
         <div className='control-btn circular'
-          onClick={() => console.log('FlashLightICon')}
+
+          onClick={() => {
+            setIsTriangleClicked(false)
+            setFlashlight(!flashlight)
+            onFlashLight()
+            // setStartDetecting(true)
+          }}
         >
-          <img src={FlashLightIcon} alt="" />
+          {
+            flashlight ? (
+              <div
+                style={{
+                  background: 'radial-gradient(#ccbd12, transparent)',
+                  padding: '25px'
+                }}
+              >
+                <img src={FlashLightIcon} alt="" />
+              </div>
+            ) : <img src={FlashLightIcon} alt="" />
+          }
+
         </div>
 
         {

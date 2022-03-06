@@ -235,6 +235,19 @@ const HardwareCamera = () => {
     globalPort.write("d");
   };
 
+  const Laser = () => {
+    if(!globalPort) {
+      return;
+    }
+    globalPort.write('y')
+  }
+
+  const FlashLight = () => {
+    if(!globalPort) {
+      return;
+    }
+    globalPort.write('t')
+  }
   // const Stop = () => {
   //   if(!globalPort) {
   //     return;
@@ -251,6 +264,8 @@ const HardwareCamera = () => {
     FastPanRight,
     TiltDown,
     TiltUp,
+    FlashLight,
+    Laser,
     globalPort
   };
 };
