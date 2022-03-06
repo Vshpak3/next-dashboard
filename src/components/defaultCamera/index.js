@@ -185,9 +185,9 @@ const DefaultCamera = (props) => {
   const [isTriangleClicked, setIsTriangleClicked] = useState(false);
   const [isStartDetecting, setStartDetecting] = useState(false)
   const [loadingOnDetecting, setloadingOnDetecting] = useState(false)
-  const [lockIcon , setIconLock] = useState(false)
-  const [flashlight , setFlashlight] = useState(false)
-  const [laserHandler , setLaserHandler] = useState(false)
+  const [lockIcon, setIconLock] = useState(false)
+  const [flashlight, setFlashlight] = useState(false)
+  const [laserHandler, setLaserHandler] = useState(false)
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -224,7 +224,7 @@ const DefaultCamera = (props) => {
   useEffect(() => {
     setTimeout(() => {
       setloadingOnDetecting(false)
-    } , 1500)
+    }, 1500)
   }, [loadingOnDetecting])
 
   const init = async () => {
@@ -895,7 +895,7 @@ const DefaultCamera = (props) => {
                 </div>
               </div>
             )}
-            <div className="d-flex w-100">
+            <div className="w-100">
               {
                 isStartDetecting && (
                   <div>
@@ -918,6 +918,13 @@ const DefaultCamera = (props) => {
                             <span>{item.class}</span>
                           </ItemPredictions>
                         ))}
+                      {/* {
+                        ['test', 'tesss', 'teersdf'].map(item => {
+                          return <ItemPredictions>
+                            <span>{item}</span>
+                          </ItemPredictions>
+                        })
+                      } */}
                     </ListPredictions>
                     <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
                       {data.length > 3 && <img src={Next} alt="next" />}
@@ -974,7 +981,7 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
-        {(isReady  && !lockIcon && !isStartDetecting) && (
+        {(isReady && !lockIcon && !isStartDetecting) && (
           <PollyLogo
             isLogoClicked={isLogoClicked}
             pollyLogo={pollyLogo}

@@ -8,6 +8,8 @@ const startDectecting = (props) => {
     isLogoClicked,
     pollyLogo,
     setIsLogoClicked,
+    isStartDetecting,
+    setStartDetecting,
     lockIcon,
     setIconLock
   } = props
@@ -34,6 +36,7 @@ const startDectecting = (props) => {
 
         onClick={() => {
           setIconLock(!lockIcon)
+          setStartDetecting(!isStartDetecting)
         }}
       >
         <img src={!lockIcon ? Unlock : StartDetecting} alt="" />
