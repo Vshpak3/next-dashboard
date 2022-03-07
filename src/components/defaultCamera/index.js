@@ -172,6 +172,7 @@ const DefaultCamera = (props) => {
   const [sentence, setSentence] = useState([]);
   const [model, setModel] = useState(null);
   const [currentChoice, setCurrentChoice] = useState(null);
+  const [classPrediction, setClassPrediction] = useState({});
   const [currentText, setCurrentText] = useState("");
   const [isReady, setIsReady] = useState(false);
   const [isSpeak, setIsSpeak] = useState(false);
@@ -195,6 +196,7 @@ const DefaultCamera = (props) => {
   const camWidthRef = useRef(null);
   const camHeightRef = useRef(null);
   const requestAnimationFrameRef = useRef(null);
+  const requestAnimationFrameRefFollow = useRef(null);
   const requestAnimationFrameIpCameraRef = useRef(null);
   const imageLoaded = useRef(false);
 
@@ -475,9 +477,9 @@ const DefaultCamera = (props) => {
   };
 
   const detectFrame = (video, model) => {
-    console.log({ video, model });
+    // console.log({ video, model });
     model.detect(video).then((predictions) => {
-      console.log({ predictions });
+      // console.log({ predictions });
       setData(
         predictions.sort((item1, item2) =>
           item1.class.localeCompare(item2.class)
@@ -485,9 +487,34 @@ const DefaultCamera = (props) => {
       );
     });
   };
+  let test
+  const detectFrameFollow = (video, model, _classChoice) => {
+    model.detect(video).then((predictions) => {
+      // console.log({ predictions });
+      // setData(
+      // predictions.sort((item1, item2) =>
+      //   item1.class.localeCompare(item2.class)
+      // )
+      // );
+      const predictionFilter = predictions.sort((item1, item2) =>
+        item1.class.localeCompare(item2.class)
+      ).filter(item => item.class === test).reduce((acc, curr) => {
+        return {
+          ...acc,
+          ...curr
+        }
+      }, {})
+      renderPredictions2(predictions.sort((item1, item2) =>
+        item1.class.localeCompare(item2.class)
+      ), predictionFilter)
+    });
+  };
 
   const stopDetect = () => {
     clearInterval(requestAnimationFrameRef.current);
+  };
+  const stopFollow = () => {
+    clearInterval(requestAnimationFrameRefFollow.current);
   };
 
   const startDetect = (initModel) => {
@@ -500,13 +527,22 @@ const DefaultCamera = (props) => {
     }, 3000);
   };
 
+  const startFollow = (initModel, _classChoice) => {
+    requestAnimationFrameRefFollow.current = setInterval(() => {
+      if (isIPCamera) {
+        detectFrameFollow(image.current, initModel, _classChoice);
+      } else {
+        detectFrameFollow(video.current, initModel, _classChoice);
+      }
+    }, 500);
+  };
+
   const clearCanvas = () => {
     const c = document.getElementById("canvas");
     if (!c) return;
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
-
   const choiceObject = (objectChoice) => {
     // did not choice object
     setIsOpenKeyboard(false);
@@ -514,9 +550,11 @@ const DefaultCamera = (props) => {
     setInputKeyboard("");
     if (currentChoice == null) {
       stopDetect();
-
+      stopFollow()
       setCurrentChoice(objectChoice);
-      renderPredictions(data, objectChoice);
+      test = objectChoice.class
+      startFollow(model, objectChoice.class)
+      // renderPredictions(data, objectChoice);
     }
     // change object other
     else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
@@ -530,6 +568,7 @@ const DefaultCamera = (props) => {
     }
     // dont choice object
     else {
+      stopFollow()
       startDetect(model);
 
       setIsShowList(false);
@@ -560,7 +599,7 @@ const DefaultCamera = (props) => {
   }, [sentenceOfCurrent]);
 
   const renderPredictions = (predictions, currentChoice) => {
-    console.log({ predictions, currentChoice });
+    // console.log({ predictions, currentChoice }, 'RENDER PREDICTION');
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
@@ -586,7 +625,70 @@ const DefaultCamera = (props) => {
       ctx.textBaseline = "top";
 
       const predictionChoice = predictions.filter(
-        (prediction) => prediction.bbox[0] === currentChoice.bbox[0]
+        (prediction) => prediction?.bbox[0] ?? 0 === currentChoice?.bbox[0] ?? 0
+      );
+
+
+      if (!!predictionChoice) {
+        predictionChoice.forEach((prediction) => {
+          let [x, y, width, height] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          width = (width * currentCamWidth) / camWidth;
+          height = (height * currentCamHeight) / camHeight;
+          // Draw the bounding box.
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x, y, width, height);
+          // Draw the label background.
+          ctx.fillStyle = "gray";
+          const textWidth = ctx.measureText(prediction.class).width;
+          const textHeight = parseInt(font, 10); // base 10
+          ctx.fillRect(x + 30, y, textWidth + 4, textHeight + 4);
+        });
+
+        predictionChoice.forEach((prediction) => {
+          let [x, y] = prediction.bbox;
+          x = (x * currentCamWidth) / camWidth;
+          y = (y * currentCamHeight) / camHeight + heightModifyCount;
+          // Draw the text last to ensure it's on top.
+          ctx.fillStyle = "#000000";
+          ctx.fillText(prediction.class, x + 30, y);
+        });
+      }
+    }
+  };
+
+  const renderPredictions2 = (predictions, currentChoice) => {
+    // console.log({ predictions, currentChoice }, 'RENDER PREDICTION');
+    const c = document.getElementById("canvas");
+    screenwidth = getWindowSize().width;
+    screenheight = getWindowSize().height;
+    let heightModifyCount = 0;
+    let currentCamHeight = screenheight;
+    let currentCamWidth = screenwidth;
+
+    const camWidth = camWidthRef.current;
+    const camHeight = camHeightRef.current;
+
+    if (screenwidth / screenheight !== camWidth / camHeight) {
+      currentCamHeight = (camHeight * screenwidth) / camWidth;
+      heightModifyCount = (screenheight - currentCamHeight) / 2;
+      currentCamWidth = screenwidth;
+    }
+
+    if (c) {
+      const ctx = c.getContext("2d");
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      // Font options.
+      const font = "16px sans-serif";
+      ctx.font = font;
+      ctx.textBaseline = "top";
+
+      const predictionChoice = predictions.filter(
+        (prediction) => {
+          return prediction?.class === currentChoice.class
+        }
       );
 
       if (!!predictionChoice) {
@@ -618,6 +720,7 @@ const DefaultCamera = (props) => {
       }
     }
   };
+
 
   // speaker
   const speakText = (text) => {
@@ -734,11 +837,11 @@ const DefaultCamera = (props) => {
       photoIpCamera.src = localStorage.getItem("ipAddress");
       context.drawImage(photoIpCamera, 0, 0, width, height);
 
-      console.log({ canvas1 });
+      // console.log({ canvas1 });
       let data = canvas1
         .toDataURL("image/png")
         .replace("image/png", "image/octet-stream");
-      console.log({ data });
+      // console.log({ data });
 
       photo.setAttribute("name", Date.now());
       photo.setAttribute("src", data);
