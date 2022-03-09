@@ -239,14 +239,16 @@ const HardwareCamera = () => {
     if(!globalPort) {
       return;
     }
-    globalPort.write('y')
+    console.log('write Z' , globalPort.write('Z'))
+    globalPort.write('Z')
   }
 
   const FlashLight = () => {
     if(!globalPort) {
       return;
     }
-    globalPort.write('t')
+    console.log('write f' , globalPort.write('f'))
+    globalPort.write('f')
   }
   // const Stop = () => {
   //   if(!globalPort) {
