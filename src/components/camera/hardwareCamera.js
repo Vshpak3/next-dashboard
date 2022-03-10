@@ -241,6 +241,9 @@ const HardwareCamera = () => {
     }
     console.log('write Z' , globalPort.write('Z'))
     globalPort.write('Z')
+    globalPort.write('Z')
+    globalPort.write('Z')
+    globalPort.write('Z')
   }
 
   const FlashLight = () => {
@@ -248,6 +251,9 @@ const HardwareCamera = () => {
       return;
     }
     console.log('write f' , globalPort.write('f'))
+    globalPort.write('f')
+    globalPort.write('f')
+    globalPort.write('f')
     globalPort.write('f')
   }
   // const Stop = () => {

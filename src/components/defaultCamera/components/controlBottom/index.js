@@ -124,7 +124,7 @@ const ControlBottom = (props) => {
         </div>
         <div className='control-btn circular'
           onClick={() => {
-            setIsTriangleClicked(false)
+            // setIsTriangleClicked(false)
             setLaserHandler(!laserHandler)
             onLaser()
             // setStartDetecting(true)
@@ -147,7 +147,7 @@ const ControlBottom = (props) => {
         <div className='control-btn circular'
 
           onClick={() => {
-            setIsTriangleClicked(false)
+            // setIsTriangleClicked(false)
             setFlashlight(!flashlight)
             onFlashLight()
             // setStartDetecting(true)
