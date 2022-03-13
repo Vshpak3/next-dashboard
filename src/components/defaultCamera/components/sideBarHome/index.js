@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { routes } from "../../../../modules/app/contants";
 
 import HomeIcon from "../../../assets/home.png";
+import { EMainDisplay } from '../../../../modules/home/constant';
 
 const SideBarHome = (props) => {
   const {
@@ -17,7 +18,12 @@ const SideBarHome = (props) => {
       <div
         onClick={() => {
           vidOff();
-          history.push(routes.home);
+          history.push({
+            pathname:routes.home,
+            state: {
+              main_view: EMainDisplay.MyHome
+            }
+          });
         }}
       >
         <img src={HomeIcon} alt="" />

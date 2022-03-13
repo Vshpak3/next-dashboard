@@ -2,19 +2,29 @@ import React from 'react'
 import "../../../assets/style.css"
 import PhotoIcon from "../../../assets/photos.png";
 import { useHistory } from "react-router-dom";
-// import { routes } from "../../../../modules/app/contants";
+import { routes } from "../../../../modules/app/contants";
+import { EMainDisplay } from '../../../../modules/home/constant';
 
 
 const SideBarImages = (props) => {
   const {
-    // vidOff,
+    vidOff,
     isLogoClicked
   } = props
-  // const history = useHistory();
+  const history = useHistory();
 
   return (
     <div className={isLogoClicked ? "btn-images active" : "btn-images"}>
-      <div>
+      <div onClick={() => {
+        vidOff();
+
+        history.push({
+          pathname: routes.home,
+          state: {
+            main_view: EMainDisplay.MyPhoto
+          }
+        });
+      }}>
         <img src={PhotoIcon} alt="" />
       </div>
     </div>

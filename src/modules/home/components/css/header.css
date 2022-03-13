@@ -1,6 +1,6 @@
 #header {
-  position: absolute;
-  width: 220px;
+  display: flex;
+  width: 20%;
 }
 #header .pro-sidebar {
   height: 100vh;

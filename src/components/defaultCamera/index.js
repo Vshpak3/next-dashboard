@@ -1117,6 +1117,7 @@ const DefaultCamera = (props) => {
         {(isReady && !lockIcon && !isStartDetecting) && (
           <SideBarImages
             isLogoClicked={isLogoClicked}
+            vidOff={vidOff}
           />
         )}
         {(isReady && !lockIcon) && (

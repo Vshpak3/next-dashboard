@@ -9,6 +9,7 @@ import Amplify from "aws-amplify";
 import { LoginContainer } from "../login/containers/login";
 import { SignUpContainer } from "../sign-up/container/sign-up";
 import { UserProfileContainer } from "../user-profile/containers/user-profile";
+import { Home } from '../home'
 import ResetPassword from "../reset-password/components/reset-password";
 import DefaultCamera from "../../components/defaultCamera";
 import TextToSpeech from "../../components/text-to-speech";
@@ -16,11 +17,10 @@ import KeyboardDemo from "../../components/keyboard/keyboard";
 import PollySpeaking from "../../components/defaultCamera/pollySpeaking";
 import ConfirmCode from "../reset-password/components/confirm-code";
 import Setting from "../setting/components/Setting";
-import Home from "../home/components/home";
 
 const Container = styled("div")``;
 
-export interface AppProps {}
+export interface AppProps { }
 
 export const App: React.FC<AppProps> = () => {
   React.useEffect(() => {
