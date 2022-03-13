@@ -21,7 +21,14 @@ const SideBarHome = (props) => {
           history.push({
             pathname:routes.home,
             state: {
-              main_view: EMainDisplay.MyHome
+              main_view: EMainDisplay.MyHome,
+              default_clicked: {
+                back_to_camera: false,
+                photos: false, // Default
+                videos: false,
+                favorites: false,
+                home:true
+              }
             }
           });
         }}

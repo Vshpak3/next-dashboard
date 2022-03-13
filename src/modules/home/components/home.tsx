@@ -43,6 +43,9 @@ const Home: React.FC<any> = () => {
     if(location?.state?.main_view) {
       setMainView(location?.state?.main_view)
     }
+    if(location?.state?.default_clicked) {
+      setMenuActive(location?.state?.default_clicked)
+    }
   } , [location])
 
   const actionHandler = {

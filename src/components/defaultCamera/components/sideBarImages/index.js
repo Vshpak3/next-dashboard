@@ -17,11 +17,17 @@ const SideBarImages = (props) => {
     <div className={isLogoClicked ? "btn-images active" : "btn-images"}>
       <div onClick={() => {
         vidOff();
-
         history.push({
           pathname: routes.home,
           state: {
-            main_view: EMainDisplay.MyPhoto
+            main_view: EMainDisplay.MyPhoto,
+            default_clicked: {
+              back_to_camera: false,
+              photos: true, // Default
+              videos: false,
+              favorites: false,
+              home:false
+            }
           }
         });
       }}>

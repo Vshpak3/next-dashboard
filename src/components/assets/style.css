@@ -540,7 +540,7 @@
   padding: 20px 40px 20px 50px;
   border: 1px solid #ffffff;
   cursor: pointer;
-  z-index: 1;
+  z-index: 999;
   transition: 750ms;
 }
 .btn-images img {
