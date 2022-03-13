@@ -1,2 +1,2 @@
 export * from './myAlbum'
-export { default as Home } from './components/home'
+export { default as Home } from './myHome/home'

@@ -1,7 +1,7 @@
 //import useState hook to create menu collapse state
 import React, { useEffect, useState } from "react";
 
-import SearchBar from '../components/search'
+import SearchBar from './search'
 import { useHistory } from "react-router-dom";
 
 //import react pro sidebar components
@@ -26,7 +26,7 @@ import { MdVideoLibrary, MdFavoriteBorder } from "react-icons/md"
 
 //import sidebar css from react-pro-sidebar module and our custom css 
 import "react-pro-sidebar/dist/css/styles.css";
-import "../components/css/header.css";
+import "./css/header.css";
 import { routes } from "../../app/contants";
 import { pollyLogo } from "../../../common/polly-logo";
 import { HomeProps } from "./home";

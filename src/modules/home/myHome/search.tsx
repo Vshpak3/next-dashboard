@@ -1,5 +1,5 @@
 import React from 'react';
-import "../components/css/search.css";
+import "./css/search.css";
 import { FiSearch } from "react-icons/fi";
 
 const SearchBar: React.FC<any> = ({ keyword, setKeyword }) => {

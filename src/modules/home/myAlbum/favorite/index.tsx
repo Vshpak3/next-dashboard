@@ -1,9 +1,25 @@
 import React from 'react'
+import { HomeProps } from '../../myHome/home'
+import MainHeader from '../components/mainHeader'
+import SubHeader from '../components/subHeader'
 
-const myFavorite:React.FC<any> = () => {
+const myFavorite:React.FC<HomeProps> = (props) => {
   return (
-    <div>
-      My Favorite
+<div style={{
+      padding:'1%'
+    }}>
+      <MainHeader />
+      <SubHeader {...props} />
+      <div style={{
+        overflowY: 'scroll',
+        padding:'1%',
+        border: '1px solid red',
+        float: 'left',
+        height: '800px',
+        position: 'relative'
+      }}>
+        My Favorite
+      </div>
     </div>
   )
 }
