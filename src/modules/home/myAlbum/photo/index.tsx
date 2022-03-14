@@ -102,16 +102,15 @@ const myPhoto: React.FC<HomeProps> = (props) => {
     }}>
       <MainHeader />
       <SubHeader {...props} />
-      <Gallery images={IMAGES} enableImageSelection={false} />
-      {/* <div style={{
+      <div style={{
         overflowY: 'scroll',
         padding: '1%',
         // border: '1px solid red',
-        float: 'left',
-        height: '800px',
-        position: 'relative'
+        // float: 'left',
+        height: '500px',
+        // position: 'relative'
       }}>
-        {
+        {/* {
           mockData.map(item => {
             return (
               <img src={item} style={{
@@ -121,8 +120,10 @@ const myPhoto: React.FC<HomeProps> = (props) => {
               }} alt="" />
             )
           })
-        }
-      </div> */}
+        } */}
+        <Gallery images={IMAGES} enableImageSelection={false} />
+
+      </div>
     </div>
   )
 }
