@@ -39,6 +39,7 @@ const Header: React.FC<HomeProps> = (props) => {
   const { menuActive } = valueHandler
   //create initial menuCollapse state using useState hook
   const [menuCollapse, setMenuCollapse] = useState(false)
+  const [albumToggle, setAlbumToggle] = useState(menuActive.videos || menuActive.photos || menuActive.favorites)
   const history = useHistory();
 
   //create a custom function that will change menucollapse state from false to true and true to false
@@ -59,6 +60,7 @@ const Header: React.FC<HomeProps> = (props) => {
   }
 
   const homeHandler = () => {
+    // menuIconClick()
     setMenuActive({
       back_to_camera: false,
       favorites: false,
@@ -78,6 +80,7 @@ const Header: React.FC<HomeProps> = (props) => {
       videos: false,
       home:false
     })
+    setAlbumToggle(!albumToggle)
     setMainView(EMainDisplay.MyPhoto)
   }
   const videoHandler = () => {
@@ -101,7 +104,7 @@ const Header: React.FC<HomeProps> = (props) => {
     setMainView(EMainDisplay.MyFavorite)
   }
 
-  const isOpen = menuActive.videos || menuActive.photos || menuActive.favorites
+  // const isOpen = menuActive.videos || menuActive.photos || menuActive.favorites
 
   return (
     <>
@@ -116,7 +119,7 @@ const Header: React.FC<HomeProps> = (props) => {
               <img style={{
                 width: '120px',
                 padding: '15px',
-                marginLeft: '75px'
+                marginLeft: '50px'
               }} src={pollyLogo} alt="" />
             </div>
           </SidebarHeader>
@@ -129,7 +132,7 @@ const Header: React.FC<HomeProps> = (props) => {
               <MenuItem icon={<IoHomeOutline size={50} />} active={menuActive.home} onClick={homeHandler}>
                 Im Home
               </MenuItem>
-              <SubMenu title="My album" open={isOpen} onOpenChange={photoHandler} icon={<HiOutlinePhotograph size={50} />}>
+              <SubMenu title="My album" open={albumToggle} onOpenChange={photoHandler} icon={<HiOutlinePhotograph size={50} />}>
                 <MenuItem icon={<IoIosPhotos />} onClick={photoHandler} active={menuActive.photos}>Photos</MenuItem>
                 <MenuItem icon={<MdVideoLibrary />} onClick={videoHandler} active={menuActive.videos}>Videos</MenuItem>
                 <MenuItem icon={<MdFavoriteBorder />} onClick={favoriteHandler} active={menuActive.favorites}>Favorites</MenuItem>

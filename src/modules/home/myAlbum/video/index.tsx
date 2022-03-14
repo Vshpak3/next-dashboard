@@ -6,7 +6,8 @@ import SubHeader from '../components/subHeader'
 const myVideo:React.FC<HomeProps> = (props) => {
   return (
     <div style={{
-      padding:'1%'
+      padding:'1%',
+      width:'100%'
     }}>
       <MainHeader />
       <SubHeader {...props} />

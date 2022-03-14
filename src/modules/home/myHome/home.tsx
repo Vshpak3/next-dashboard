@@ -61,7 +61,10 @@ const Home: React.FC<any> = () => {
   const mainRender = () => {
     switch (mainView) {
       case EMainDisplay.MyHome:
-        return <div>HOME</div>
+        return <div style={{
+          padding: '1%',
+          width: '100%'
+        }}>HOME</div>
       case EMainDisplay.MyPhoto:
         return <MyPhoto actionHandler={actionHandler} valueHandler={valueHandler} />
       case EMainDisplay.MyVideo:
@@ -78,9 +81,7 @@ const Home: React.FC<any> = () => {
     <>
       <div className="polly-home">
         <Header actionHandler={actionHandler} valueHandler={valueHandler} />
-        <div>
-          {mainRender()}
-        </div>
+        {mainRender()}
       </div>
     </>
   );
