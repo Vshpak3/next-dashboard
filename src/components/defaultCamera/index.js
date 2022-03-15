@@ -34,7 +34,7 @@ import {
 } from './components'
 
 import * as faceapi from 'face-api.js'
-
+import { loadModels , detectFaces , drawResults} from "./helpers/faceApi";
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -232,13 +232,19 @@ const DefaultCamera = (props) => {
   }, [loadingOnDetecting])
 
   const init = async () => {
-    await getDeviceList();
-    await getSentenceData();
-    await faceapi.nets.tinyFaceDetector.loadFromUri('../../../public/models')
-    await faceapi.nets.faceLandmark68Net.loadFromUri('../../../public/models')
-    await faceapi.nets.faceRecognitionNet.loadFromUri('../../../public/models')
-    await faceapi.nets.faceExpressionNet.loadFromUri('../../../public/models')
-    getModel();
+    try {
+      await getDeviceList();
+      await getSentenceData();
+      // await loadModels()
+      await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
+      await faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+      await faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+      await faceapi.nets.faceExpressionNet.loadFromUri('/models')
+      await faceapi.nets.ageGenderNet.loadFromUri('/models')
+      getModel();
+    } catch (error) {
+      console.log('ERR', error)
+    }
   };
 
   const getDeviceList = async () => {
@@ -543,6 +549,41 @@ const DefaultCamera = (props) => {
     }, 500);
   };
 
+
+  const startDetectionEmotion = async () => {
+    try {
+      const c = document.getElementById("canvas");
+      const faces = await detectFaces(video);
+
+      await drawResults(video, c, faces, 'boxLandmarks');
+      // console.log('HERE')
+      // const canvas = faceapi.createCanvas(video)
+      // console.log('@@@AAA', canvas, video)
+      // // document.body.append(canvas)
+      // // document.querySelector("#video").append(canvas);
+      // // document.body.append(canvas);
+      // const displaySize = { width: video.current.clientWidth, height: video.current.clientHeight }
+      // console.log('DISPLATY', displaySize)
+      // faceapi.matchDimensions(canvas, displaySize)
+      // await faceapi.detectSingleFace(video)
+      // await faceapi.detectSingleFace(video).withFaceExpressions()
+      // await faceapi.detectSingleFace(video).withFaceLandmarks()
+      // await faceapi.detectSingleFace(video).withFaceExpressions().withFaceLandmarks()
+      // await faceapi.detectSingleFace(video).withFaceExpressions().withFaceLandmarks().withFaceDescriptor()
+      // // setInterval(async () => {
+      // //   const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+      // //   const resizedDetections = faceapi.resizeResults(detections, displaySize)
+      // //   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+      // //   faceapi.draw.drawDetections(canvas, resizedDetections)
+      // //   faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+      // //   faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+      // // }, 100)
+    } catch (error) {
+      console.log('ERROR FACE', error)
+    }
+  }
+
+
   const clearCanvas = () => {
     const c = document.getElementById("canvas");
     if (!c) return;
@@ -561,6 +602,7 @@ const DefaultCamera = (props) => {
       test = objectChoice.class
       startFollow(model, objectChoice.class)
       // renderPredictions(data, objectChoice);
+      startDetectionEmotion()
     }
     // change object other
     else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
