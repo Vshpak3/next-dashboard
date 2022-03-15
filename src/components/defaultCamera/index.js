@@ -33,6 +33,8 @@ import {
   StartDetecting
 } from './components'
 
+import * as faceapi from 'face-api.js'
+
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -232,6 +234,10 @@ const DefaultCamera = (props) => {
   const init = async () => {
     await getDeviceList();
     await getSentenceData();
+    await faceapi.nets.tinyFaceDetector.loadFromUri('../../../public/models')
+    await faceapi.nets.faceLandmark68Net.loadFromUri('../../../public/models')
+    await faceapi.nets.faceRecognitionNet.loadFromUri('../../../public/models')
+    await faceapi.nets.faceExpressionNet.loadFromUri('../../../public/models')
     getModel();
   };
 

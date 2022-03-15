@@ -21,6 +21,7 @@
     "aws-sdk": "^2.802.0",
     "bootstrap": "^4.5.3",
     "electron-is-dev": "^2.0.0",
+    "face-api.js": "^0.22.2",
     "jquery": "^3.6.0",
     "predictionary": "^1.4.4",
     "react": "^17.0.1",
