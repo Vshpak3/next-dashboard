@@ -34,7 +34,7 @@ import {
 } from './components'
 
 import * as faceapi from 'face-api.js'
-import { loadModels , detectFaces , drawResults} from "./helpers/faceApi";
+import { detectFaces, drawResults } from "./helpers/faceApi";
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -191,6 +191,7 @@ const DefaultCamera = (props) => {
   const [lockIcon, setIconLock] = useState(false)
   const [flashlight, setFlashlight] = useState(false)
   const [laserHandler, setLaserHandler] = useState(false)
+  const [facesResult, setFacesResult] = useState([]);
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -200,6 +201,7 @@ const DefaultCamera = (props) => {
   const requestAnimationFrameRef = useRef(null);
   const requestAnimationFrameRefFollow = useRef(null);
   const requestAnimationFrameIpCameraRef = useRef(null);
+  const requestAnimationFrameEmotion = useRef(null);
   const imageLoaded = useRef(false);
 
   const video = useRef(null);
@@ -528,6 +530,10 @@ const DefaultCamera = (props) => {
   const stopFollow = () => {
     clearInterval(requestAnimationFrameRefFollow.current);
   };
+  const stopFaceRegocnition = () => {
+    const c = document.getElementById("canvas");
+    clearInterval(requestAnimationFrameEmotion.current);
+  };
 
   const startDetect = (initModel) => {
     requestAnimationFrameRef.current = setInterval(() => {
@@ -549,40 +555,21 @@ const DefaultCamera = (props) => {
     }, 500);
   };
 
-
-  const startDetectionEmotion = async () => {
+  const startDetectionEmotion = () => {
     try {
-      const c = document.getElementById("canvas");
-      const faces = await detectFaces(video);
-
-      await drawResults(video, c, faces, 'boxLandmarks');
-      // console.log('HERE')
-      // const canvas = faceapi.createCanvas(video)
-      // console.log('@@@AAA', canvas, video)
-      // // document.body.append(canvas)
-      // // document.querySelector("#video").append(canvas);
-      // // document.body.append(canvas);
-      // const displaySize = { width: video.current.clientWidth, height: video.current.clientHeight }
-      // console.log('DISPLATY', displaySize)
-      // faceapi.matchDimensions(canvas, displaySize)
-      // await faceapi.detectSingleFace(video)
-      // await faceapi.detectSingleFace(video).withFaceExpressions()
-      // await faceapi.detectSingleFace(video).withFaceLandmarks()
-      // await faceapi.detectSingleFace(video).withFaceExpressions().withFaceLandmarks()
-      // await faceapi.detectSingleFace(video).withFaceExpressions().withFaceLandmarks().withFaceDescriptor()
-      // // setInterval(async () => {
-      // //   const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-      // //   const resizedDetections = faceapi.resizeResults(detections, displaySize)
-      // //   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-      // //   faceapi.draw.drawDetections(canvas, resizedDetections)
-      // //   faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-      // //   faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-      // // }, 100)
+      requestAnimationFrameEmotion.current = setInterval(async () => {
+        const c = document.getElementById("canvas");
+        const faces = await detectFaces(video.current);
+        // await drawResults(video.current, c, faces, 'box');
+        if (faces?.length) {
+          setFacesResult(faces)
+        }
+      }, 1000);
     } catch (error) {
+      clearCanvas()
       console.log('ERROR FACE', error)
     }
   }
-
 
   const clearCanvas = () => {
     const c = document.getElementById("canvas");
@@ -617,6 +604,7 @@ const DefaultCamera = (props) => {
     // dont choice object
     else {
       stopFollow()
+      stopFaceRegocnition()
       startDetect(model);
 
       setIsShowList(false);
@@ -947,6 +935,25 @@ const DefaultCamera = (props) => {
       });
     }
   };
+  // console.log('sentenceOfCurrent', facesResult,
+  //   facesResult?.map((item) => {
+  //     const test = Object.entries(item.expressions)
+  //       .map(([key, value]) => {
+  //         return {
+  //           expression: key,
+  //           value
+  //         };
+  //       })
+  //       .sort((a, b) => {
+  //         return b.value - a.value;
+  //       })?.[0].expression;
+  //     console.log(test, ' testttttttttttttttttttttt')
+  //     return test
+  //   })
+    // .reduce((acc, curr) => {
+    //   return [...acc, ...curr];
+    // }, [])[0].expression ?? []
+  // )
 
   return (
     <React.Fragment>
@@ -1011,6 +1018,29 @@ const DefaultCamera = (props) => {
                       {inputKeyboard !== ""
                         ? inputKeyboard
                         : sentenceOfCurrent[0]}
+                    </div>
+                  )}
+                  {/* {result.expressions.asSortedArray()[0].expression} */}
+                  {!isShowList && (
+                    <div className="icon text-mess text-bg">
+                      {
+                        facesResult?.map((item) => {
+                          const test = Object.entries(item.expressions)
+                            .map(([key, value]) => {
+                              return {
+                                expression: key,
+                                value
+                              };
+                            })
+                            .sort((a, b) => {
+                              return b.value - a.value;
+                            })?.[0].expression;
+                          console.log(test?.[0], ' testttttttttttttttttttttt')
+                          return (
+                            <h1>{test}</h1>
+                          )
+                        })
+                      }
                     </div>
                   )}
                 </div>
