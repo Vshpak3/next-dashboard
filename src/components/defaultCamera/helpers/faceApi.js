@@ -59,3 +59,19 @@ export const drawResults = async (image, canvas, results, type) => {
     }
   }
 };
+
+
+export const faceResultHandler = (facesResult) => {
+  return facesResult?.map((item) => {
+    return Object.entries(item.expressions)
+      .map(([key, value]) => {
+        return {
+          expression: key,
+          value
+        };
+      })
+      .sort((a, b) => {
+        return b.value - a.value;
+      })?.[0].expression;
+  })
+}

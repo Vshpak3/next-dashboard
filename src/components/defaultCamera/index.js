@@ -34,7 +34,7 @@ import {
 } from './components'
 
 import * as faceapi from 'face-api.js'
-import { detectFaces, drawResults } from "./helpers/faceApi";
+import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -192,6 +192,7 @@ const DefaultCamera = (props) => {
   const [flashlight, setFlashlight] = useState(false)
   const [laserHandler, setLaserHandler] = useState(false)
   const [facesResult, setFacesResult] = useState([]);
+  const [expressionResult, setExpressionResult] = useState([]);
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -210,6 +211,13 @@ const DefaultCamera = (props) => {
   const isIPCamera =
     !!localStorage.getItem("ipAddress") &&
     localStorage.getItem("ipAddress") !== "";
+
+  useEffect(() => {
+    if (facesResult.length) {
+      setExpressionResult(faceResultHandler(facesResult))
+    }
+  }, [facesResult])
+
 
   const {
     mouseOverTop,
@@ -950,9 +958,9 @@ const DefaultCamera = (props) => {
   //     console.log(test, ' testttttttttttttttttttttt')
   //     return test
   //   })
-    // .reduce((acc, curr) => {
-    //   return [...acc, ...curr];
-    // }, [])[0].expression ?? []
+  // .reduce((acc, curr) => {
+  //   return [...acc, ...curr];
+  // }, [])[0].expression ?? []
   // )
 
   return (
@@ -1023,24 +1031,7 @@ const DefaultCamera = (props) => {
                   {/* {result.expressions.asSortedArray()[0].expression} */}
                   {!isShowList && (
                     <div className="icon text-mess text-bg">
-                      {
-                        facesResult?.map((item) => {
-                          const test = Object.entries(item.expressions)
-                            .map(([key, value]) => {
-                              return {
-                                expression: key,
-                                value
-                              };
-                            })
-                            .sort((a, b) => {
-                              return b.value - a.value;
-                            })?.[0].expression;
-                          console.log(test?.[0], ' testttttttttttttttttttttt')
-                          return (
-                            <h1>{test}</h1>
-                          )
-                        })
-                      }
+                      {`I'am ${expressionResult}`}
                     </div>
                   )}
                 </div>
