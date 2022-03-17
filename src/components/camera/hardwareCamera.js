@@ -39,7 +39,7 @@ const HardwareCamera = () => {
 
     // let port = new SerialPort(portPath, { autoOpen: false });
 
-    console.log({ port });
+    // console.log({ port });
 
     // setTimeout(function () {
     //   console.log("trying open");
@@ -95,7 +95,7 @@ const HardwareCamera = () => {
   
     tempPort.on('readable', function(data) {
       var input = tempPort.read();
-      console.log('input', input)
+      // console.log('input', input)
       if (input == '11') {
         // console.log(tempPort.path);
         console.log('success');
@@ -113,7 +113,7 @@ const HardwareCamera = () => {
   }
 
   const handlePorts = async () => {
-    console.log("handlePorts");
+    // console.log("handlePorts");
     let ports;
     try {
       ports = await SerialPort.list();

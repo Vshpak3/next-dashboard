@@ -192,7 +192,7 @@ const DefaultCamera = (props) => {
   const [flashlight, setFlashlight] = useState(false)
   const [laserHandler, setLaserHandler] = useState(false)
   const [facesResult, setFacesResult] = useState([]);
-  const [expressionResult, setExpressionResult] = useState([]);
+  const [expressionResult, setExpressionResult] = useState('');
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -572,7 +572,7 @@ const DefaultCamera = (props) => {
         if (faces?.length) {
           setFacesResult(faces)
         }
-      }, 1000);
+      }, 500);
     } catch (error) {
       clearCanvas()
       console.log('ERROR FACE', error)
@@ -1029,7 +1029,7 @@ const DefaultCamera = (props) => {
                     </div>
                   )}
                   {/* {result.expressions.asSortedArray()[0].expression} */}
-                  {!isShowList && (
+                  {(!isShowList && expressionResult) && (
                     <div className="icon text-mess text-bg">
                       {`I'am ${expressionResult}`}
                     </div>
