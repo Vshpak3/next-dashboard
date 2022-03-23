@@ -32,7 +32,6 @@ import {
   LoaderStartDetecting,
   StartDetecting
 } from './components'
-
 import * as faceapi from 'face-api.js'
 import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
 const remote = window.require("electron").remote;
@@ -246,11 +245,11 @@ const DefaultCamera = (props) => {
       await getDeviceList();
       await getSentenceData();
       // await loadModels()
-      await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
-      await faceapi.nets.faceLandmark68Net.loadFromUri('/models')
-      await faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-      await faceapi.nets.faceExpressionNet.loadFromUri('/models')
-      await faceapi.nets.ageGenderNet.loadFromUri('/models')
+      await faceapi.nets.tinyFaceDetector.loadFromUri('./models')
+      await faceapi.nets.faceLandmark68Net.loadFromUri('./models')
+      await faceapi.nets.faceRecognitionNet.loadFromUri('./models')
+      await faceapi.nets.faceExpressionNet.loadFromUri('./models')
+      await faceapi.nets.ageGenderNet.loadFromUri('./models')
       getModel();
     } catch (error) {
       console.log('ERR', error)
