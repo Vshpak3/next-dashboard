@@ -240,6 +240,8 @@ const DefaultCamera = (props) => {
     }, 1500)
   }, [loadingOnDetecting])
 
+  console.log(process.cwd()  , 'window.location.pathnamewindow.location.pathname')
+
   const init = async () => {
     try {
       await getDeviceList();
