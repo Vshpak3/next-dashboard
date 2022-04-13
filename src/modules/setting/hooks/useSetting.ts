@@ -39,6 +39,8 @@ const useSetting = () => {
 
   console.log({ ipCameraInfo });
 
+  console.log(ipCameraInfo,"~")
+
   const GetDeviceList = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
       const devices = await navigator.mediaDevices.enumerateDevices();

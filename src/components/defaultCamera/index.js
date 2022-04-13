@@ -305,8 +305,10 @@ const DefaultCamera = (props) => {
 
     // const webCamPromise = loadVideo(video.current);
     const modelPromise = cocoSsd.load();
+    console.log(modelPromise,"modelPromisemodelPromise")
 
     const model = await Promise.all([modelPromise]);
+    console.log(model[0],"modelmodel")
     setModel(model[0]);
 
     if (isIPCamera) {
@@ -384,18 +386,26 @@ const DefaultCamera = (props) => {
   };
 
   const getModel = async () => {
-    console.log({ isIPCamera });
+    console.log( isIPCamera,"isIPCameraisIPCameraisIPCameraisIPCamera");
     try {
       if (!isIPCamera) {
-        const webCamPromise = loadVideo(video.current);
-        const modelPromise = cocoSsd.load();
-
+        console.log("hereeee")
+         const webCamPromise = loadVideo(video.current);
+         console.log(webCamPromise,"webCamPromisewebCamPromise")
+        const modelPromise = await cocoSsd.load().then((res)=>{console.log(res,"sadsdsadasdas1232423")});
+        console.log(cocoSsd.load(),"sdasdsadsadas")
+        console.log(modelPromise,"modelPromisemodelPromise")
+         console.log("Asdsdsa")
+         
         const allPromiseResponse = await Promise.all([
           modelPromise,
-          webCamPromise,
+           webCamPromise,
         ]);
+
+        console.log(allPromiseResponse,"apiresponse")
         setIsReady(true);
         setModel(allPromiseResponse[0]);
+        console.log("2")
 
         // start detect frame
         startDetect(allPromiseResponse[0]);
@@ -491,7 +501,7 @@ const DefaultCamera = (props) => {
         await Storage.get(`${list[i]}`, { level: "public" })
           .then((result) => {
             listText = JSON.parse(readTextFile(result));
-          })
+          })  
           .catch((err) => console.log(err));
       }
 
@@ -500,15 +510,15 @@ const DefaultCamera = (props) => {
   };
 
   const detectFrame = (video, model) => {
-    // console.log({ video, model });
-    model.detect(video).then((predictions) => {
-      // console.log({ predictions });
-      setData(
-        predictions.sort((item1, item2) =>
-          item1.class.localeCompare(item2.class)
-        )
-      );
-    });
+     console.log({ video, model },"sadsadasdsasdmndbsbdsab");
+    // model?.detect(video).then((predictions) => {
+    //   // console.log({ predictions });
+    //   setData(
+    //     predictions.sort((item1, item2) =>
+    //       item1.class.localeCompare(item2.class)
+    //     )
+    //   );
+    // });
   };
   let test
   const detectFrameFollow = (video, model, _classChoice) => {
