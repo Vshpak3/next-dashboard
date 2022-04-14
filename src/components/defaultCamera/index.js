@@ -15,12 +15,11 @@ import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
 import { pollyLogo } from '../../common/polly-logo'
-
-
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
 import useControlCamera from "../camera/useControlCamera";
+import * as tf from "@tensorflow/tfjs";
 import {
   ControlHardware,
   PollyLogo,
@@ -233,6 +232,7 @@ const DefaultCamera = (props) => {
   useEffect(() => {
     init();
   }, []);
+  
 
   useEffect(() => {
     setTimeout(() => {
@@ -297,6 +297,25 @@ const DefaultCamera = (props) => {
 
   const image = useRef(null);
 
+
+    // extra code
+
+  // async function loadModel() {
+  //   try {
+  //     const model = await cocoSsd.load();
+  //     setModel(model);
+  //     console.log("setloadedModel");
+  //   } catch (err) {
+  //     console.log(err);
+  //     console.log("failed load model");
+  //   }
+  // }
+  // useEffect(() => {
+  //   tf.ready().then(() => {
+  //     loadModel();
+  //   });
+  // }, []);
+
   const launchCamera = async () => {
     // debugger;
     const currentIPCam = localStorage.getItem("ipAddress");
@@ -304,23 +323,23 @@ const DefaultCamera = (props) => {
     const password = localStorage.getItem("ipPassword");
 
     // const webCamPromise = loadVideo(video.current);
+    console.log(cocoSsd,"sadasdsadas12")
     const modelPromise = cocoSsd.load();
     console.log(modelPromise,"modelPromisemodelPromise")
-
-    const model = await Promise.all([modelPromise]);
-    console.log(model[0],"modelmodel")
-    setModel(model[0]);
+    const model = await ([modelPromise]);
+    console.log(model,"modelmodel")
+    setModel(model);
 
     if (isIPCamera) {
       cacheHttpCameraCredentials(currentIPCam, userName, password);
-      // image.current = new Image();
-      // image.current.onload = function () {};
-      // image.current.src = currentIPCam;
-      // image.current.width = screenwidth;
-      // image.current.height = screenheight;
+      image.current = new Image();
+      image.current.onload = function () {};
+      image.current.src = currentIPCam;
+      image.current.width = screenwidth;
+      image.current.height = screenheight;
       setIsReady(true);
 
-      // startCanvas();
+       startCanvas();
       updateCanvas(model[0]);
       // const imageTest = document.getElementById("imgTest");
       image.current.crossOrigin = "Anonymous";
@@ -333,49 +352,49 @@ const DefaultCamera = (props) => {
     }
   };
 
-  // function startCanvas() {
-  //   requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
-  //     updateCanvas
-  //   );
-  // }
+  function startCanvas() {
+    requestAnimationFrameIpCameraRef.current = requestAnimationFrame(
+      updateCanvas
+    );
+  }
 
   //use with ip camera
   const updateCanvas = async (model) => {
     // debugger;
-    // const canvas = document.getElementById("myCanvas");
-    // image.current = document.getElementById("imgTest");
+    const canvas = document.getElementById("myCanvas");
+    image.current = document.getElementById("imgTest");
 
-    // let aspect = video.videoHeight / video.videoWidth;
-    // const width = 800;
-    // let height = 600;
-    // // if (!isIPCamera) height = Math.round(width * aspect);
-    // canvas.width = width;
-    // canvas.height = height;
-    //
-    // if (!canvas) return;
-    // const ctx = canvas.getContext("2d");
-    //
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let aspect = video.videoHeight / video.videoWidth;
+    const width = 800;
+    let height = 600;
+    // if (!isIPCamera) height = Math.round(width * aspect);
+    canvas.width = width;
+    canvas.height = height;
+    
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (isIPCamera) {
       try {
-        // image.current = new Image();
-        // image.current.crossOrigin = "anonymous";
-        // image.current.onload = function () {
-        //   console.log("Image loaded");
-        // };
-        // image.current.src = localStorage.getItem("ipAddress");
-        // ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
+        image.current = new Image();
+        image.current.crossOrigin = "anonymous";
+        image.current.onload = function () {
+          console.log("Image loaded");
+        };
+        image.current.src = localStorage.getItem("ipAddress");
+        ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
         image.current.width = screenwidth;
         image.current.height = screenheight;
-        // image.current.crossOrigin = "";
+         image.current.crossOrigin = "";
         camWidthRef.current = screenwidth;
         camHeightRef.current = screenheight;
         image.current.src = `${localStorage.getItem("ipAddress")}`;
-        // if (model) {
-        //   model.detect(image.current).then((predictions) => {
-        //     renderPredictions(predictions, currentChoice);
-        //   });
-        // }
+        if (model) {
+          model.detect(image.current).then((predictions) => {
+            renderPredictions(predictions, currentChoice);
+          });
+        }
       } catch (e) {
         console.log(e);
       }
@@ -392,7 +411,7 @@ const DefaultCamera = (props) => {
         console.log("hereeee")
          const webCamPromise = loadVideo(video.current);
          console.log(webCamPromise,"webCamPromisewebCamPromise")
-        const modelPromise = await cocoSsd.load().then((res)=>{console.log(res,"sadsdsadasdas1232423")});
+        const modelPromise = await cocoSsd.load()
         console.log(cocoSsd.load(),"sdasdsadsadas")
         console.log(modelPromise,"modelPromisemodelPromise")
          console.log("Asdsdsa")
@@ -511,24 +530,24 @@ const DefaultCamera = (props) => {
 
   const detectFrame = (video, model) => {
      console.log({ video, model },"sadsadasdsasdmndbsbdsab");
-    // model?.detect(video).then((predictions) => {
-    //   // console.log({ predictions });
-    //   setData(
-    //     predictions.sort((item1, item2) =>
-    //       item1.class.localeCompare(item2.class)
-    //     )
-    //   );
-    // });
+    model?.detect(video).then((predictions) => {
+       console.log({ predictions });
+      setData(
+        predictions.sort((item1, item2) =>
+          item1.class.localeCompare(item2.class)
+        )
+      );
+    });
   };
   let test
   const detectFrameFollow = (video, model, _classChoice) => {
     model.detect(video).then((predictions) => {
-      // console.log({ predictions });
-      // setData(
-      // predictions.sort((item1, item2) =>
-      //   item1.class.localeCompare(item2.class)
-      // )
-      // );
+      console.log({ predictions });
+      setData(
+      predictions.sort((item1, item2) =>
+        item1.class.localeCompare(item2.class)
+      )
+      );
       const predictionFilter = predictions.sort((item1, item2) =>
         item1.class.localeCompare(item2.class)
       ).filter(item => item.class === test).reduce((acc, curr) => {
@@ -579,7 +598,7 @@ const DefaultCamera = (props) => {
       requestAnimationFrameEmotion.current = setInterval(async () => {
         const c = document.getElementById("canvas");
         const faces = await detectFaces(video.current);
-        // await drawResults(video.current, c, faces, 'box');
+         await drawResults(video.current, c, faces, 'box');
         if (faces?.length) {
           setFacesResult(faces)
         }
