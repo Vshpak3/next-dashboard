@@ -562,7 +562,7 @@ const DefaultCamera = (props) => {
     });
   };
 
-  const stopDetect = () => {
+   const stopDetect = () => {
     clearInterval(requestAnimationFrameRef.current);
   };
   const stopFollow = () => {
@@ -610,17 +610,21 @@ const DefaultCamera = (props) => {
   }
 
   const clearCanvas = () => {
+    console.log("clearcanvasdsadas")
     const c = document.getElementById("canvas");
     if (!c) return;
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
+
+  
   const choiceObject = (objectChoice) => {
+    console.log(objectChoice,"objectChoiceobjectChoice")
     // did not choice object
     setIsOpenKeyboard(false);
     setIsSpeak(false);
     setInputKeyboard("");
-    if (currentChoice == null) {
+    if (currentChoice == null ) {
       stopDetect();
       stopFollow()
       setCurrentChoice(objectChoice);
@@ -632,7 +636,6 @@ const DefaultCamera = (props) => {
     // change object other
     else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
       stopDetect();
-
       setIsShowList(false);
       setInputKeyboard("");
       setIsOpenKeyboard(false);
@@ -1032,7 +1035,7 @@ const DefaultCamera = (props) => {
           </Col>
 
           <Predictions>
-            {!!currentChoice && (
+            {!!currentChoice && isStartDetecting &&  (
               <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4 align-items-end">
                 <div>
                   {isShowList && (
@@ -1097,6 +1100,7 @@ const DefaultCamera = (props) => {
                 </div>
               </div>
             )}
+            
             <div className="w-100">
               {
                 isStartDetecting && (
@@ -1192,6 +1196,13 @@ const DefaultCamera = (props) => {
         )}
         {(isReady && isStartDetecting) && (
           <StartDetecting
+          
+          stop={()=>{setModel(null);setCurrentChoice(null);
+           setTimeout(()=>clearCanvas(),1000)
+          }}
+          stopDetect={stopDetect}
+          stopFaceRegocnition={stopFaceRegocnition}
+          stopFollow={stopFollow}
             isLogoClicked={isLogoClicked}
             pollyLogo={pollyLogo}
             setIsLogoClicked={setIsLogoClicked}
@@ -1221,6 +1232,7 @@ const DefaultCamera = (props) => {
         )}
         {(isReady && !lockIcon) && (
           <ControlBottom
+          
             setIsTriangleClicked={setIsTriangleClicked}
             setStartDetecting={setStartDetecting}
             setloadingOnDetecting={setloadingOnDetecting}

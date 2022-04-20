@@ -11,9 +11,14 @@ const startDectecting = (props) => {
     isStartDetecting,
     setStartDetecting,
     lockIcon,
-    setIconLock
+    setIconLock,
+    stopDetect,
+    stopFollow,
+    stopFaceRegocnition,
+    stop
   } = props
-
+    
+  console.log(isStartDetecting,"isStartDetectingisStartDetecting")
   return (
     <div className="btn-polly-logo"
       style={{
@@ -33,8 +38,11 @@ const startDectecting = (props) => {
       
     >
       <div
-
         onClick={() => {
+          stop();
+          stopDetect();
+          stopFollow();
+          stopFaceRegocnition();
           setIconLock(!lockIcon)
           setStartDetecting(!isStartDetecting)
         }}
