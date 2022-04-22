@@ -33,6 +33,7 @@ import {
 } from './components'
 import * as faceapi from 'face-api.js'
 import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
+import useGetAlexaResponse from "../../hooks/useGetAlexaResponse"
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -48,6 +49,8 @@ Amplify.configure({
     identityPoolId: awsconfig.aws_cognito_identity_pool_id,
   },
 });
+
+const alexaURL='https://fog9qugx7f.execute-api.us-east-1.amazonaws.com/default/fun201'
 
 const initialData = [
   { class: "Person" },
@@ -202,6 +205,7 @@ const DefaultCamera = (props) => {
   const requestAnimationFrameIpCameraRef = useRef(null);
   const requestAnimationFrameEmotion = useRef(null);
   const imageLoaded = useRef(false);
+  const expResult = useRef(null);
 
   const video = useRef(null);
   const camera = useRef(null);
@@ -209,11 +213,36 @@ const DefaultCamera = (props) => {
   const isIPCamera =
     !!localStorage.getItem("ipAddress") &&
     localStorage.getItem("ipAddress") !== "";
+    
+    const {data: expressionResponseData,fetchExpression}= useGetAlexaResponse(alexaURL)
+
 
   useEffect(() => {
-    if (facesResult.length) {
-      setExpressionResult(faceResultHandler(facesResult))
+    if(expressionResponseData?.data?.response?.message){
+      const voices = window.speechSynthesis.getVoices();
+     const speech = new SpeechSynthesisUtterance();
+     speech.text = expressionResponseData?.data?.response?.message;
+     speech.voice = voices[48];
+     window.speechSynthesis.speak(speech)
     }
+  // eslint-disable-next-line no-use-before-define
+  },[expressionResponseData?.data?.response?.message]);
+  
+  
+  useEffect(() => {
+    if (facesResult.length) {
+      const fResult=faceResultHandler(facesResult)
+      setExpressionResult(fResult)
+
+      if(fResult?.[0] !== expResult.current?.[0]){
+        console.log(fResult,"fResultfResult",expResult)
+        fetchExpression({
+        expression:fResult[0]
+        })
+        expResult.current = fResult;
+      }
+    }
+    
   }, [facesResult])
 
 
@@ -837,6 +866,8 @@ const DefaultCamera = (props) => {
       }
     });
   };
+
+ 
   const pollyaudioplay = (audiosource) => {
     return new Promise(function (resolve, reject) {
       setIsSpeak(true);
@@ -995,7 +1026,6 @@ const DefaultCamera = (props) => {
   //   return [...acc, ...curr];
   // }, [])[0].expression ?? []
   // )
-
   return (
     <React.Fragment>
       <Container fluid={true}>
