@@ -34,6 +34,7 @@ import {
 import * as faceapi from 'face-api.js'
 import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
 import useGetAlexaResponse from "../../hooks/useGetAlexaResponse"
+import OnOffButton from './components/onOffButton/Index'
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -216,9 +217,10 @@ const DefaultCamera = (props) => {
     
     const {data: expressionResponseData,fetchExpression}= useGetAlexaResponse(alexaURL)
 
+    const [toogle,setToggle]=useState(true)
 
-  useEffect(() => {
-    if(expressionResponseData?.data?.response?.message){
+     useEffect(() => {
+    if(expressionResponseData?.data?.response?.message && toogle ){
       const voices = window.speechSynthesis.getVoices();
      const speech = new SpeechSynthesisUtterance();
      speech.text = expressionResponseData?.data?.response?.message;
@@ -234,7 +236,7 @@ const DefaultCamera = (props) => {
       const fResult=faceResultHandler(facesResult)
       setExpressionResult(fResult)
 
-      if(fResult?.[0] !== expResult.current?.[0]){
+      if(fResult?.[0] !== expResult.current?.[0] && toogle){
         console.log(fResult,"fResultfResult",expResult)
         fetchExpression({
         expression:fResult[0]
@@ -1224,9 +1226,17 @@ const DefaultCamera = (props) => {
             setIsLogoClicked={setIsLogoClicked}
           />
         )}
+        
+
+            {(isReady && isStartDetecting) && (
+          <OnOffButton  
+            lockIcon={lockIcon}
+            onToggle = {() => setToggle(prev => !prev)}
+          />
+        )}
+
         {(isReady && isStartDetecting) && (
-          <StartDetecting
-          
+          <StartDetecting   
           stop={()=>{setModel(null);setCurrentChoice(null);
            setTimeout(()=>clearCanvas(),1000)
           }}
