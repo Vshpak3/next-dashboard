@@ -1,6 +1,6 @@
 import React,{useState} from 'react'
-import Unlock from "../../../assets/unlock.png";
-import lock from "../../../assets/lock.png";
+import talkIcon from "../../../assets/talkIcon.png";
+import silent from "../../../assets/silent.png";
 import "../../../assets/style.css"
 import StartDetecting from "../../../assets/onfrontcamera.png";
 
@@ -17,7 +17,7 @@ const OnOffButton = (props) => {
     <div className="btn-polly-logo"
       style={{
         position: 'absolute',
-        right: '25%',
+        right: '15%',
         top: '2%',
         height: '100px',
         width: '185px',
@@ -33,7 +33,7 @@ const OnOffButton = (props) => {
     >
       <div onClick={() => {onToggle(); setToogle(!toggle)}}>
           {/* {toggle===false ? <h1>Off</h1> : <h1>On</h1> } */}
-          <img style={{width:'80px', height:'80px'}} src={toggle===false ? Unlock : lock} alt="" />
+          <img style={{width:'80px', height:'80px'}} src={toggle===false ? talkIcon : silent} alt="" />
         
       </div>
     </div>
