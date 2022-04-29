@@ -14,7 +14,7 @@ import Spinner from "../assets/Spinner.gif";
 import TalkIcon from "../assets/talkIcon.png";
 import CancelMess from "../assets/cancelMessIcon.png";
 import KeyboardIcon from "../assets/ketboardIcon.png";
-import { pollyLogo } from '../../common/polly-logo'
+import { pollyLogo } from "../../common/polly-logo";
 import styled from "styled-components";
 import awsconfig from "../../aws-exports.ts";
 import AWS from "aws-sdk";
@@ -29,12 +29,13 @@ import {
   ControlBottom,
   LoaderPollyLogo,
   LoaderStartDetecting,
-  StartDetecting
-} from './components'
-import * as faceapi from 'face-api.js'
+  StartDetecting,
+} from "./components";
+import * as faceapi from "face-api.js";
 import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
-import useGetAlexaResponse from "../../hooks/useGetAlexaResponse"
-import OnOffButton from './components/onOffButton/Index'
+import useGetAlexaResponse from "../../hooks/useGetAlexaResponse";
+import OnOffButton from "./components/onOffButton/Index";
+import CameraOption from "./components/cameraOptions/multipleCameras";
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -51,7 +52,8 @@ Amplify.configure({
   },
 });
 
-const alexaURL='https://fog9qugx7f.execute-api.us-east-1.amazonaws.com/default/fun201'
+const alexaURL =
+  "https://fog9qugx7f.execute-api.us-east-1.amazonaws.com/default/fun201";
 
 const initialData = [
   { class: "Person" },
@@ -160,7 +162,6 @@ const Focus = styled.div`
 
 const ImageWrapper = styled.div``;
 
-
 const ImageNavigate = styled.img`
   width: 80px;
   height: auto;
@@ -188,13 +189,14 @@ const DefaultCamera = (props) => {
   const [inputKeyboard, setInputKeyboard] = useState("");
   const [isLogoClicked, setIsLogoClicked] = useState(false);
   const [isTriangleClicked, setIsTriangleClicked] = useState(false);
-  const [isStartDetecting, setStartDetecting] = useState(false)
-  const [loadingOnDetecting, setloadingOnDetecting] = useState(false)
-  const [lockIcon, setIconLock] = useState(false)
-  const [flashlight, setFlashlight] = useState(false)
-  const [laserHandler, setLaserHandler] = useState(false)
+  const [isStartDetecting, setStartDetecting] = useState(false);
+  const [loadingOnDetecting, setloadingOnDetecting] = useState(false);
+  const [lockIcon, setIconLock] = useState(false);
+  const [flashlight, setFlashlight] = useState(false);
+  const [laserHandler, setLaserHandler] = useState(false);
   const [facesResult, setFacesResult] = useState([]);
-  const [expressionResult, setExpressionResult] = useState('');
+  const [expressionResult, setExpressionResult] = useState("");
+  const [cameraDeviceList, setCameraDeviceList] = useState([]);
 
   let screenwidth = getWindowSize().width;
   let screenheight = getWindowSize().height;
@@ -211,42 +213,42 @@ const DefaultCamera = (props) => {
   const video = useRef(null);
   const camera = useRef(null);
   const history = useHistory();
+
   const isIPCamera =
     !!localStorage.getItem("ipAddress") &&
     localStorage.getItem("ipAddress") !== "";
-    
-    const {data: expressionResponseData,fetchExpression}= useGetAlexaResponse(alexaURL)
 
-    const [toogle,setToggle]=useState(true)
+  const { data: expressionResponseData, fetchExpression } = useGetAlexaResponse(
+    alexaURL
+  );
 
-     useEffect(() => {
-    if(expressionResponseData?.data?.response?.message && toogle ){
+  const [toogle, setToggle] = useState(true);
+
+  useEffect(() => {
+    if (expressionResponseData?.data?.response?.message && toogle) {
       const voices = window.speechSynthesis.getVoices();
-     const speech = new SpeechSynthesisUtterance();
-     speech.text = expressionResponseData?.data?.response?.message;
-     speech.voice = voices[48];
-     window.speechSynthesis.speak(speech)
+      const speech = new SpeechSynthesisUtterance();
+      speech.text = expressionResponseData?.data?.response?.message;
+      speech.voice = voices[48];
+      window.speechSynthesis.speak(speech);
     }
-  // eslint-disable-next-line no-use-before-define
-  },[expressionResponseData?.data?.response?.message]);
-  
-  
+    // eslint-disable-next-line no-use-before-define
+  }, [expressionResponseData?.data?.response?.message]);
+
   useEffect(() => {
     if (facesResult.length) {
-      const fResult=faceResultHandler(facesResult)
-      setExpressionResult(fResult)
+      const fResult = faceResultHandler(facesResult);
+      setExpressionResult(fResult);
 
-      if(fResult?.[0] !== expResult.current?.[0] && toogle){
-        console.log(fResult,"fResultfResult",expResult)
+      if (fResult?.[0] !== expResult.current?.[0] && toogle) {
+        console.log(fResult, "fResultfResult", expResult);
         fetchExpression({
-        expression:fResult[0]
-        })
+          expression: fResult[0],
+        });
         expResult.current = fResult;
       }
     }
-    
-  }, [facesResult])
-
+  }, [facesResult]);
 
   const {
     mouseOverTop,
@@ -263,29 +265,31 @@ const DefaultCamera = (props) => {
   useEffect(() => {
     init();
   }, []);
-  
 
   useEffect(() => {
     setTimeout(() => {
-      setloadingOnDetecting(false)
-    }, 1500)
-  }, [loadingOnDetecting])
+      setloadingOnDetecting(false);
+    }, 1500);
+  }, [loadingOnDetecting]);
 
-  console.log(process.cwd()  , 'window.location.pathnamewindow.location.pathname')
+  console.log(
+    process.cwd(),
+    "window.location.pathnamewindow.location.pathname"
+  );
 
   const init = async () => {
     try {
       await getDeviceList();
       await getSentenceData();
       // await loadModels()
-      await faceapi.nets.tinyFaceDetector.loadFromUri('./models')
-      await faceapi.nets.faceLandmark68Net.loadFromUri('./models')
-      await faceapi.nets.faceRecognitionNet.loadFromUri('./models')
-      await faceapi.nets.faceExpressionNet.loadFromUri('./models')
-      await faceapi.nets.ageGenderNet.loadFromUri('./models')
+      await faceapi.nets.tinyFaceDetector.loadFromUri("./models");
+      await faceapi.nets.faceLandmark68Net.loadFromUri("./models");
+      await faceapi.nets.faceRecognitionNet.loadFromUri("./models");
+      await faceapi.nets.faceExpressionNet.loadFromUri("./models");
+      await faceapi.nets.ageGenderNet.loadFromUri("./models");
       getModel();
     } catch (error) {
-      console.log('ERR', error)
+      console.log("ERR", error);
     }
   };
 
@@ -299,8 +303,19 @@ const DefaultCamera = (props) => {
           list.push(devices[i].deviceId);
         }
       }
+      setCameraDeviceList(
+        devices.filter((device) => device.kind === "videoinput")
+      );
     }
+    console.log(list, "alksalkSNAkjsnakjsnajksnaskjd");
     camera.current = list.length == 0 ? null : list[0];
+  };
+
+  const changeCamera = (deviceId) => {
+    console.log(deviceId, "deviceIddeviceId");
+    camera.current = deviceId;
+    getModel();
+    // loadVideo(video);
   };
 
   const cacheHttpCameraCredentials = (
@@ -328,8 +343,7 @@ const DefaultCamera = (props) => {
 
   const image = useRef(null);
 
-
-    // extra code
+  // extra code
 
   // async function loadModel() {
   //   try {
@@ -354,11 +368,11 @@ const DefaultCamera = (props) => {
     const password = localStorage.getItem("ipPassword");
 
     // const webCamPromise = loadVideo(video.current);
-    console.log(cocoSsd,"sadasdsadas12")
+    console.log(cocoSsd, "sadasdsadas12");
     const modelPromise = cocoSsd.load();
-    console.log(modelPromise,"modelPromisemodelPromise")
-    const model = await ([modelPromise]);
-    console.log(model,"modelmodel")
+    console.log(modelPromise, "modelPromisemodelPromise");
+    const model = await [modelPromise];
+    console.log(model, "modelmodel");
     setModel(model);
 
     if (isIPCamera) {
@@ -370,7 +384,7 @@ const DefaultCamera = (props) => {
       image.current.height = screenheight;
       setIsReady(true);
 
-       startCanvas();
+      startCanvas();
       updateCanvas(model[0]);
       // const imageTest = document.getElementById("imgTest");
       image.current.crossOrigin = "Anonymous";
@@ -401,10 +415,10 @@ const DefaultCamera = (props) => {
     // if (!isIPCamera) height = Math.round(width * aspect);
     canvas.width = width;
     canvas.height = height;
-    
+
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (isIPCamera) {
       try {
@@ -417,7 +431,7 @@ const DefaultCamera = (props) => {
         ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
         image.current.width = screenwidth;
         image.current.height = screenheight;
-         image.current.crossOrigin = "";
+        image.current.crossOrigin = "";
         camWidthRef.current = screenwidth;
         camHeightRef.current = screenheight;
         image.current.src = `${localStorage.getItem("ipAddress")}`;
@@ -436,26 +450,26 @@ const DefaultCamera = (props) => {
   };
 
   const getModel = async () => {
-    console.log( isIPCamera,"isIPCameraisIPCameraisIPCameraisIPCamera");
+    console.log(isIPCamera, "isIPCameraisIPCameraisIPCameraisIPCamera");
     try {
       if (!isIPCamera) {
-        console.log("hereeee")
-         const webCamPromise = loadVideo(video.current);
-         console.log(webCamPromise,"webCamPromisewebCamPromise")
-        const modelPromise = await cocoSsd.load()
-        console.log(cocoSsd.load(),"sdasdsadsadas")
-        console.log(modelPromise,"modelPromisemodelPromise")
-         console.log("Asdsdsa")
-         
+        console.log("hereeee");
+        const webCamPromise = loadVideo(video.current);
+        console.log(webCamPromise, "webCamPromisewebCamPromise");
+        const modelPromise = await cocoSsd.load();
+        console.log(cocoSsd.load(), "sdasdsadsadas");
+        console.log(modelPromise, "modelPromisemodelPromise");
+        console.log("Asdsdsa");
+
         const allPromiseResponse = await Promise.all([
           modelPromise,
-           webCamPromise,
+          webCamPromise,
         ]);
 
-        console.log(allPromiseResponse,"apiresponse")
+        console.log(allPromiseResponse, "apiresponse");
         setIsReady(true);
         setModel(allPromiseResponse[0]);
-        console.log("2")
+        console.log("2");
 
         // start detect frame
         startDetect(allPromiseResponse[0]);
@@ -470,6 +484,7 @@ const DefaultCamera = (props) => {
   const currentStream = useRef(null);
 
   const loadVideo = (video) => {
+    console.log(video, "videovideovideo");
     if (!camera.current) return;
     const webCamPromise = navigator.mediaDevices
       .getUserMedia({
@@ -551,7 +566,7 @@ const DefaultCamera = (props) => {
         await Storage.get(`${list[i]}`, { level: "public" })
           .then((result) => {
             listText = JSON.parse(readTextFile(result));
-          })  
+          })
           .catch((err) => console.log(err));
       }
 
@@ -560,9 +575,8 @@ const DefaultCamera = (props) => {
   };
 
   const detectFrame = (video, model) => {
-     console.log({ video, model },"sadsadasdsasdmndbsbdsab");
     model?.detect(video).then((predictions) => {
-       console.log({ predictions });
+      console.log({ predictions });
       setData(
         predictions.sort((item1, item2) =>
           item1.class.localeCompare(item2.class)
@@ -570,30 +584,34 @@ const DefaultCamera = (props) => {
       );
     });
   };
-  let test
+  let test;
   const detectFrameFollow = (video, model, _classChoice) => {
     model.detect(video).then((predictions) => {
       console.log({ predictions });
       setData(
-      predictions.sort((item1, item2) =>
-        item1.class.localeCompare(item2.class)
-      )
+        predictions.sort((item1, item2) =>
+          item1.class.localeCompare(item2.class)
+        )
       );
-      const predictionFilter = predictions.sort((item1, item2) =>
-        item1.class.localeCompare(item2.class)
-      ).filter(item => item.class === test).reduce((acc, curr) => {
-        return {
-          ...acc,
-          ...curr
-        }
-      }, {})
-      renderPredictions2(predictions.sort((item1, item2) =>
-        item1.class.localeCompare(item2.class)
-      ), predictionFilter)
+      const predictionFilter = predictions
+        .sort((item1, item2) => item1.class.localeCompare(item2.class))
+        .filter((item) => item.class === test)
+        .reduce((acc, curr) => {
+          return {
+            ...acc,
+            ...curr,
+          };
+        }, {});
+      renderPredictions2(
+        predictions.sort((item1, item2) =>
+          item1.class.localeCompare(item2.class)
+        ),
+        predictionFilter
+      );
     });
   };
 
-   const stopDetect = () => {
+  const stopDetect = () => {
     clearInterval(requestAnimationFrameRef.current);
   };
   const stopFollow = () => {
@@ -629,40 +647,39 @@ const DefaultCamera = (props) => {
       requestAnimationFrameEmotion.current = setInterval(async () => {
         const c = document.getElementById("canvas");
         const faces = await detectFaces(video.current);
-         await drawResults(video.current, c, faces, 'box');
+        await drawResults(video.current, c, faces, "box");
         if (faces?.length) {
-          setFacesResult(faces)
+          setFacesResult(faces);
         }
       }, 500);
     } catch (error) {
-      clearCanvas()
-      console.log('ERROR FACE', error)
+      clearCanvas();
+      console.log("ERROR FACE", error);
     }
-  }
+  };
 
   const clearCanvas = () => {
-    console.log("clearcanvasdsadas")
+    console.log("clearcanvasdsadas");
     const c = document.getElementById("canvas");
     if (!c) return;
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
 
-  
   const choiceObject = (objectChoice) => {
-    console.log(objectChoice,"objectChoiceobjectChoice")
+    console.log(objectChoice, "objectChoiceobjectChoice");
     // did not choice object
     setIsOpenKeyboard(false);
     setIsSpeak(false);
     setInputKeyboard("");
-    if (currentChoice == null ) {
+    if (currentChoice == null) {
       stopDetect();
-      stopFollow()
+      stopFollow();
       setCurrentChoice(objectChoice);
-      test = objectChoice.class
-      startFollow(model, objectChoice.class)
+      test = objectChoice.class;
+      startFollow(model, objectChoice.class);
       // renderPredictions(data, objectChoice);
-      startDetectionEmotion()
+      startDetectionEmotion();
     }
     // change object other
     else if (currentChoice.bbox[0] !== objectChoice.bbox[0]) {
@@ -675,8 +692,8 @@ const DefaultCamera = (props) => {
     }
     // dont choice object
     else {
-      stopFollow()
-      stopFaceRegocnition()
+      stopFollow();
+      stopFaceRegocnition();
       startDetect(model);
 
       setIsShowList(false);
@@ -736,7 +753,6 @@ const DefaultCamera = (props) => {
         (prediction) => prediction?.bbox[0] ?? 0 === currentChoice?.bbox[0] ?? 0
       );
 
-
       if (!!predictionChoice) {
         predictionChoice.forEach((prediction) => {
           let [x, y, width, height] = prediction.bbox;
@@ -793,11 +809,9 @@ const DefaultCamera = (props) => {
       ctx.font = font;
       ctx.textBaseline = "top";
 
-      const predictionChoice = predictions.filter(
-        (prediction) => {
-          return prediction?.class === currentChoice.class
-        }
-      );
+      const predictionChoice = predictions.filter((prediction) => {
+        return prediction?.class === currentChoice.class;
+      });
 
       if (!!predictionChoice) {
         predictionChoice.forEach((prediction) => {
@@ -828,7 +842,6 @@ const DefaultCamera = (props) => {
       }
     }
   };
-
 
   // speaker
   const speakText = (text) => {
@@ -869,7 +882,6 @@ const DefaultCamera = (props) => {
     });
   };
 
- 
   const pollyaudioplay = (audiosource) => {
     return new Promise(function (resolve, reject) {
       setIsSpeak(true);
@@ -1067,7 +1079,7 @@ const DefaultCamera = (props) => {
           </Col>
 
           <Predictions>
-            {!!currentChoice && isStartDetecting &&  (
+            {!!currentChoice && isStartDetecting && (
               <div className="d-flex w-100 action-list justify-content-end pr-5 mb-4 align-items-end">
                 <div>
                   {isShowList && (
@@ -1077,8 +1089,9 @@ const DefaultCamera = (props) => {
                         .map((item, index) => (
                           <div
                             key={index}
-                            className={`text-bg my-2 button_click_cursor ${item === currentText ? "active" : ""
-                              }`}
+                            className={`text-bg my-2 button_click_cursor ${
+                              item === currentText ? "active" : ""
+                            }`}
                             onClick={() => choiceTextSpeak(item)}
                           >
                             {item}
@@ -1094,7 +1107,7 @@ const DefaultCamera = (props) => {
                     </div>
                   )}
                   {/* {result.expressions.asSortedArray()[0].expression} */}
-                  {(!isShowList && expressionResult) && (
+                  {!isShowList && expressionResult && (
                     <div className="icon text-mess text-bg">
                       {`I'am ${expressionResult}`}
                     </div>
@@ -1118,8 +1131,9 @@ const DefaultCamera = (props) => {
                   )}
                 </div>
                 <div
-                  className={`icon-circle cancel-mess ${isShowList ? "active" : ""
-                    }`}
+                  className={`icon-circle cancel-mess ${
+                    isShowList ? "active" : ""
+                  }`}
                   onClick={() => toggleShowList()}
                 >
                   <img src={CancelMess} alt="" />
@@ -1132,44 +1146,42 @@ const DefaultCamera = (props) => {
                 </div>
               </div>
             )}
-            
+
             <div className="w-100">
-              {
-                isStartDetecting && (
-                  <div>
-                    <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
-                      {data.length > 3 && <img src={Back} alt="back" />}
-                    </Navigate>
-                    <ListPredictions id={"listPredictions"}>
-                      {data.length > 0 &&
-                        data.map((item, index) => (
-                          <ItemPredictions
-                            className={
-                              currentChoice != null &&
-                                item.bbox[0] === currentChoice.bbox[0]
-                                ? "active"
-                                : ""
-                            }
-                            key={index}
-                            onClick={() => choiceObject(item)}
-                          >
-                            <span>{item.class}</span>
-                          </ItemPredictions>
-                        ))}
-                      {/* {
+              {isStartDetecting && (
+                <div>
+                  <Navigate onClick={() => (data.length > 3 ? backItem() : {})}>
+                    {data.length > 3 && <img src={Back} alt="back" />}
+                  </Navigate>
+                  <ListPredictions id={"listPredictions"}>
+                    {data.length > 0 &&
+                      data.map((item, index) => (
+                        <ItemPredictions
+                          className={
+                            currentChoice != null &&
+                            item.bbox[0] === currentChoice.bbox[0]
+                              ? "active"
+                              : ""
+                          }
+                          key={index}
+                          onClick={() => choiceObject(item)}
+                        >
+                          <span>{item.class}</span>
+                        </ItemPredictions>
+                      ))}
+                    {/* {
                         ['test', 'tesss', 'teersdf'].map(item => {
                           return <ItemPredictions>
                             <span>{item}</span>
                           </ItemPredictions>
                         })
                       } */}
-                    </ListPredictions>
-                    <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
-                      {data.length > 3 && <img src={Next} alt="next" />}
-                    </Navigate>
-                  </div>
-                )
-              }
+                  </ListPredictions>
+                  <Navigate onClick={() => (data.length > 3 ? nextItem() : {})}>
+                    {data.length > 3 && <img src={Next} alt="next" />}
+                  </Navigate>
+                </div>
+              )}
             </div>
           </Predictions>
         </Row>
@@ -1181,11 +1193,7 @@ const DefaultCamera = (props) => {
             <LoaderPollyLogo pollyLogo={pollyLogo} />
           </div>
         )}
-        {
-          (isReady && loadingOnDetecting) && (
-            <LoaderStartDetecting />
-          )
-        }
+        {isReady && loadingOnDetecting && <LoaderStartDetecting />}
         {isOpenKeyboard && (
           <Keyboard
             // keyboardRef={(r) => onChange(r)}
@@ -1195,7 +1203,7 @@ const DefaultCamera = (props) => {
             value={inputKeyboard}
           />
         )}
-        {(isReady && !lockIcon && !isStartDetecting && !isTriangleClicked) && (
+        {isReady && !lockIcon && !isStartDetecting && !isTriangleClicked && (
           <ControlHardware
             mouseOverTop={mouseOverTop}
             mouseOverSlowRight={mouseOverSlowRight}
@@ -1207,7 +1215,7 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
-        {(isReady && !lockIcon && isStartDetecting) && (
+        {isReady && !lockIcon && isStartDetecting && (
           <ControlHardware
             mouseOverTop={mouseOverTop}
             mouseOverSlowRight={mouseOverSlowRight}
@@ -1219,30 +1227,39 @@ const DefaultCamera = (props) => {
             isLogoClicked={isLogoClicked}
           />
         )}
-        {(isReady && !lockIcon && !isStartDetecting) && (
+        {isReady && !lockIcon && !isStartDetecting && (
           <PollyLogo
             isLogoClicked={isLogoClicked}
             pollyLogo={pollyLogo}
             setIsLogoClicked={setIsLogoClicked}
           />
         )}
-        
 
-            {(isReady && isStartDetecting) && (
-          <OnOffButton  
-            lockIcon={lockIcon}
-            onToggle = {() => setToggle(prev => !prev)}
+        {isReady && isStartDetecting && (
+          <CameraOption
+            loadVideo={loadVideo}
+            cameraDeviceList={cameraDeviceList}
+            changeCamera={changeCamera}
           />
         )}
 
-        {(isReady && isStartDetecting) && (
-          <StartDetecting   
-          stop={()=>{setModel(null);setCurrentChoice(null);
-           setTimeout(()=>clearCanvas(),1000)
-          }}
-          stopDetect={stopDetect}
-          stopFaceRegocnition={stopFaceRegocnition}
-          stopFollow={stopFollow}
+        {isReady && isStartDetecting && (
+          <OnOffButton
+            lockIcon={lockIcon}
+            onToggle={() => setToggle((prev) => !prev)}
+          />
+        )}
+
+        {isReady && isStartDetecting && (
+          <StartDetecting
+            stop={() => {
+              setModel(null);
+              setCurrentChoice(null);
+              setTimeout(() => clearCanvas(), 1000);
+            }}
+            stopDetect={stopDetect}
+            stopFaceRegocnition={stopFaceRegocnition}
+            stopFollow={stopFollow}
             isLogoClicked={isLogoClicked}
             pollyLogo={pollyLogo}
             setIsLogoClicked={setIsLogoClicked}
@@ -1252,27 +1269,17 @@ const DefaultCamera = (props) => {
             isStartDetecting={isStartDetecting}
           />
         )}
-        {(isReady && !lockIcon && !isStartDetecting) && (
-          <SideBarHome
-            isLogoClicked={isLogoClicked}
-            vidOff={vidOff}
-          />
+        {isReady && !lockIcon && !isStartDetecting && (
+          <SideBarHome isLogoClicked={isLogoClicked} vidOff={vidOff} />
         )}
-        {(isReady && !lockIcon && !isStartDetecting) && (
-          <SideBarSetting
-            isLogoClicked={isLogoClicked}
-            vidOff={vidOff}
-          />
+        {isReady && !lockIcon && !isStartDetecting && (
+          <SideBarSetting isLogoClicked={isLogoClicked} vidOff={vidOff} />
         )}
-        {(isReady && !lockIcon && !isStartDetecting) && (
-          <SideBarImages
-            isLogoClicked={isLogoClicked}
-            vidOff={vidOff}
-          />
+        {isReady && !lockIcon && !isStartDetecting && (
+          <SideBarImages isLogoClicked={isLogoClicked} vidOff={vidOff} />
         )}
-        {(isReady && !lockIcon) && (
+        {isReady && !lockIcon && (
           <ControlBottom
-          
             setIsTriangleClicked={setIsTriangleClicked}
             setStartDetecting={setStartDetecting}
             setloadingOnDetecting={setloadingOnDetecting}
@@ -1295,8 +1302,6 @@ const DefaultCamera = (props) => {
 };
 
 export default withRouter(DefaultCamera);
-
-
 
 const LogoIconWrapper = styled("div")`
   text-align: center;
