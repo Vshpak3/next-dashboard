@@ -36,6 +36,9 @@ import { detectFaces, drawResults, faceResultHandler } from "./helpers/faceApi";
 import useGetAlexaResponse from "../../hooks/useGetAlexaResponse";
 import OnOffButton from "./components/onOffButton/Index";
 import CameraOption from "./components/cameraOptions/multipleCameras";
+// import HandPoseDetection from "./components/handPostDetection/HandPoseDetection";
+import { drawRect } from "./components/handPostDetection/Utilites";
+
 const remote = window.require("electron").remote;
 
 Amplify.configure({
@@ -211,8 +214,85 @@ const DefaultCamera = (props) => {
   const expResult = useRef(null);
 
   const video = useRef(null);
+  console.log(video, "videovideo");
   const camera = useRef(null);
   const history = useHistory();
+
+  const runCoco = async () => {
+    console.log("12322321321");
+
+    // 3. TODO - Load network
+    // e.g. const net = await cocossd.load();
+    // https://tensorflowjsrealtimemodel.s3.au-syd.cloud-object-storage.appdomain.cloud/model.json
+    const net = await tf.loadGraphModel(
+      "https://tensorflowjsrealtimemodel.s3.au-syd.cloud-object-storage.appdomain.cloud/model.json"
+    );
+    console.log(net, "netnetnetnet");
+
+    //  Loop and detect hands
+    setInterval(() => {
+      detect(net);
+    }, 16.7);
+  };
+  const detect = async (net) => {
+    // Check data is available
+    if (typeof video.current !== "undefined" && video.current !== null) {
+      console.log("wwwwwwww");
+      // Get Video Properties
+      const videocam = video.current;
+      console.log(videocam, "videocamvideocam");
+      const videoWidth = video.current.videoWidth;
+      const videoHeight = video.current.videoHeight;
+
+      // Set video width
+      video.current.width = videoWidth;
+      video.current.height = videoHeight;
+
+      const canvas = document.getElementById("myCanvas");
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+
+      // Set canvas height and width
+      // canvasRef.current.width = videoWidth;
+      // canvasRef.current.height = videoHeight;
+
+      // 4. TODO - Make Detections
+      const img = tf.browser.fromPixels(videocam);
+      const resized = tf.image.resizeBilinear(img, [800, 600]);
+      const casted = resized.cast("int32");
+      const expanded = casted.expandDims(0);
+      const obj = await net.executeAsync(expanded);
+      console.log(obj, "sssss");
+
+      const boxes = await obj[1].array();
+      const classes = await obj[2].array();
+      const scores = await obj[4].array();
+
+      // Draw mesh
+      const ctx = canvas.getContext("2d");
+
+      // 5. TODO - Update drawing utility
+      // drawSomething(obj, ctx)
+      requestAnimationFrame(() => {
+        console.log("aaaaaaaaaaaaa");
+        drawRect(
+          boxes[0],
+          classes[0],
+          scores[0],
+          0.8,
+          videoWidth,
+          videoHeight,
+          ctx
+        );
+      });
+
+      tf.dispose(img);
+      tf.dispose(resized);
+      tf.dispose(casted);
+      tf.dispose(expanded);
+      tf.dispose(obj);
+    }
+  };
 
   const isIPCamera =
     !!localStorage.getItem("ipAddress") &&
@@ -237,6 +317,7 @@ const DefaultCamera = (props) => {
 
   useEffect(() => {
     if (facesResult.length) {
+      // HandPoseDetection();
       const fResult = faceResultHandler(facesResult);
       setExpressionResult(fResult);
 
@@ -368,11 +449,8 @@ const DefaultCamera = (props) => {
     const password = localStorage.getItem("ipPassword");
 
     // const webCamPromise = loadVideo(video.current);
-    console.log(cocoSsd, "sadasdsadas12");
     const modelPromise = cocoSsd.load();
-    console.log(modelPromise, "modelPromisemodelPromise");
     const model = await [modelPromise];
-    console.log(model, "modelmodel");
     setModel(model);
 
     if (isIPCamera) {
@@ -424,9 +502,7 @@ const DefaultCamera = (props) => {
       try {
         image.current = new Image();
         image.current.crossOrigin = "anonymous";
-        image.current.onload = function () {
-          console.log("Image loaded");
-        };
+        image.current.onload = function () {};
         image.current.src = localStorage.getItem("ipAddress");
         ctx.drawImage(image.current, 0, 0, canvas.width, canvas.height);
         image.current.width = screenwidth;
@@ -450,26 +526,17 @@ const DefaultCamera = (props) => {
   };
 
   const getModel = async () => {
-    console.log(isIPCamera, "isIPCameraisIPCameraisIPCameraisIPCamera");
     try {
       if (!isIPCamera) {
-        console.log("hereeee");
         const webCamPromise = loadVideo(video.current);
-        console.log(webCamPromise, "webCamPromisewebCamPromise");
         const modelPromise = await cocoSsd.load();
-        console.log(cocoSsd.load(), "sdasdsadsadas");
-        console.log(modelPromise, "modelPromisemodelPromise");
-        console.log("Asdsdsa");
-
         const allPromiseResponse = await Promise.all([
           modelPromise,
           webCamPromise,
         ]);
 
-        console.log(allPromiseResponse, "apiresponse");
         setIsReady(true);
         setModel(allPromiseResponse[0]);
-        console.log("2");
 
         // start detect frame
         startDetect(allPromiseResponse[0]);
@@ -484,7 +551,6 @@ const DefaultCamera = (props) => {
   const currentStream = useRef(null);
 
   const loadVideo = (video) => {
-    console.log(video, "videovideovideo");
     if (!camera.current) return;
     const webCamPromise = navigator.mediaDevices
       .getUserMedia({
@@ -520,10 +586,8 @@ const DefaultCamera = (props) => {
   const vidOff = () => {
     stopDetect();
     currentStream.current?.getTracks()[0].stop();
-    console.log(requestAnimationFrameIpCameraRef.current);
     window.cancelAnimationFrame(requestAnimationFrameIpCameraRef.current);
     requestAnimationFrameIpCameraRef.current = null;
-    // console.log("Vid off");
   };
 
   const readTextFile = (file) => {
@@ -659,7 +723,6 @@ const DefaultCamera = (props) => {
   };
 
   const clearCanvas = () => {
-    console.log("clearcanvasdsadas");
     const c = document.getElementById("canvas");
     if (!c) return;
     const ctx = c.getContext("2d");
@@ -667,11 +730,12 @@ const DefaultCamera = (props) => {
   };
 
   const choiceObject = (objectChoice) => {
-    console.log(objectChoice, "objectChoiceobjectChoice");
     // did not choice object
     setIsOpenKeyboard(false);
     setIsSpeak(false);
     setInputKeyboard("");
+    runCoco();
+
     if (currentChoice == null) {
       stopDetect();
       stopFollow();
@@ -724,7 +788,6 @@ const DefaultCamera = (props) => {
   }, [sentenceOfCurrent]);
 
   const renderPredictions = (predictions, currentChoice) => {
-    // console.log({ predictions, currentChoice }, 'RENDER PREDICTION');
     const c = document.getElementById("canvas");
     screenwidth = getWindowSize().width;
     screenheight = getWindowSize().height;
@@ -853,7 +916,6 @@ const DefaultCamera = (props) => {
       ...initSpeak,
       Text: inputKeyboard ? inputKeyboard : text,
     };
-    console.log("Final Polly Data", finalData);
 
     if (finalData.Text !== "") {
       let filename = `sen_${Date.now()}.json`;
@@ -963,7 +1025,6 @@ const DefaultCamera = (props) => {
       let data = canvas1
         .toDataURL("image/png")
         .replace("image/png", "image/octet-stream");
-      // console.log({ data });
 
       photo.setAttribute("name", Date.now());
       photo.setAttribute("src", data);
